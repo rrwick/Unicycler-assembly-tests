@@ -1,0 +1,20 @@
+# This text file describes the commands necessary for running an assembler.
+
+# The lines following 'Short read assembly commands' describe the assembly of
+# paired-end short reads. The lines following 'Hybrid assembly commands'
+# describe the assembly of hybrid read sets. The lines following 'Final
+# assembly files' are the filenames of the end product(s) of assembly.
+
+# The commands will be executed with 'SHORT_READS_1', 'SHORT_READS_2' and
+# 'LONG_READS' replaced as appropriate.
+
+
+# Hybrid assembly commands
+spades.py -1 SHORT_READS_1 -2 SHORT_READS_2 --careful --threads 8 -o spades_assembly
+jsa.seq.sort -r -n --input spades_assembly/contigs.fasta --output np_scarf.fasta
+bwa index np_scarf.fasta
+bwa mem -t8 -k11 -W20 -r10 -A1 -B1 -O1 -E1 -L0 -a -Y np_scarf.fasta LONG_READS > alignments.sam
+jsa.np.gapcloser -b alignments.sam -seq np_scarf.fasta
+
+# Final assembly files
+np_scarf.fasta
