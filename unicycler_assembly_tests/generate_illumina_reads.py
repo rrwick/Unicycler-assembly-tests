@@ -17,8 +17,16 @@ from unicycler_assembly_tests.misc import load_fasta, get_relative_depths
 
 def main():
     args = get_args()
-    make_fake_short_reads(args.reference, args.short_1, args.short_2, args.depth,
-                          args.rotation_count, args.platform)
+    print()
+    print('Making fake Illumina reads for ' + args.reference)
+    print('  platform:     ' + args.seq_sys)
+    print('  read length:  ' + str(args.read_length))
+    print('  insert size:  ' + str(args.insert_size))
+    print('  insert stdev: ' + str(args.insert_stdev))
+    print('  output 1:     ' + str(args.short_1))
+    print('  output 2:     ' + str(args.short_2))
+    make_fake_short_reads(args)
+    print()
 
 
 def get_args():
@@ -50,9 +58,9 @@ def get_args():
 
     # Preset options.
     parser.add_argument('--good', action='store_true',
-                        help='equivalent to --depth 80.0 --platform MSv3_250')
+                        help='equivalent to --depth 100.0 --platform HS25_150')
     parser.add_argument('--medium', action='store_true',
-                        help='equivalent to --depth 45.0 --platform HS25_125')
+                        help='equivalent to --depth 40.0 --platform HS25_125')
     parser.add_argument('--bad', action='store_true',
                         help='equivalent to --depth 40.0 --platform HS10_100')
 
@@ -69,22 +77,26 @@ def get_args():
         sys.exit('Only one preset can be used at a time')
 
     if args.good:
-        args.depth, args.platform = 80.0, 'MSv3_250'
+        args.depth, args.platform = 100.0, 'HS25_150'
     elif args.medium:
-        args.depth, args.platform = 45.0, 'HS25_125'
+        args.depth, args.platform = 40.0, 'HS25_125'
     elif args.bad:
         args.depth, args.platform = 40.0, 'HS10_100'
 
     if args.platform not in platform_options:
         sys.exit('--platform must be one of the following: ' + ', '.join(platform_options))
 
+    args.seq_sys = args.platform.split('_')[0]
+    args.read_length = int(args.platform.split('_')[1])
+    args.insert_size = min(500, int(args.read_length * 3.5))
+    args.insert_stdev = max(25, args.insert_size // 6)
+
     return args
 
 
-def make_fake_short_reads(reference, read_filename_1, read_filename_2, depth, rotation_count,
-                          platform):
-    references = load_fasta(reference)
-    relative_depths = get_relative_depths(reference)
+def make_fake_short_reads(args):
+    references = load_fasta(args.reference)
+    relative_depths = get_relative_depths(args.reference)
 
     # This will hold all simulated short reads. Each read is a list of 8 strings: the first four are
     # for the first read in the pair, the second four are for the second.
@@ -93,29 +105,29 @@ def make_fake_short_reads(reference, read_filename_1, read_filename_2, depth, ro
     read_prefix = 1  # Used to prevent duplicate read names.
     for i, ref in enumerate(references):
 
-        short_depth = relative_depths[i] * depth
+        short_depth = relative_depths[i] * args.depth
 
         ref_seq = ref[1]
         circular = ref[3]
 
         if circular:
-            short_depth_per_rotation = short_depth / rotation_count
+            short_depth_per_rotation = short_depth / args.rotation_count
 
-            for j in range(rotation_count):
+            for j in range(args.rotation_count):
 
                 # Randomly rotate the sequence.
                 random_start = random.randint(0, len(ref_seq) - 1)
                 rotated = ref_seq[random_start:] + ref_seq[:random_start]
 
                 # Save the rotated sequence to FASTA.
-                temp_fasta_filename = 'temp_rotated.fasta'
+                temp_fasta_filename = 'temp_rotated_' + str(os.getpid()) + '.fasta'
                 temp_fasta = open(temp_fasta_filename, 'w')
                 temp_fasta.write('>' + ref[0] + '\n')
                 temp_fasta.write(rotated + '\n')
                 temp_fasta.close()
 
                 short_read_pairs += run_art(temp_fasta_filename, short_depth_per_rotation,
-                                            str(read_prefix), platform)
+                                            str(read_prefix), args)
                 os.remove(temp_fasta_filename)
                 read_prefix += 1
 
@@ -126,13 +138,12 @@ def make_fake_short_reads(reference, read_filename_1, read_filename_2, depth, ro
             temp_fasta.write(ref_seq + '\n')
             temp_fasta.close()
 
-            short_read_pairs += run_art(temp_fasta_filename, short_depth, str(read_prefix),
-                                        platform)
+            short_read_pairs += run_art(temp_fasta_filename, short_depth, str(read_prefix), args)
             os.remove(temp_fasta_filename)
             read_prefix += 1
 
     random.shuffle(short_read_pairs)
-    with gzip.open(read_filename_1, 'wt') as reads_1, gzip.open(read_filename_2, 'wt') as reads_2:
+    with gzip.open(args.short_1, 'wt') as reads_1, gzip.open(args.short_2, 'wt') as reads_2:
         for i, read_pair in enumerate(short_read_pairs):
             read_name = '@short_read_' + str(i+1)
             reads_1.write(read_name + '/1')
@@ -153,30 +164,28 @@ def make_fake_short_reads(reference, read_filename_1, read_filename_2, depth, ro
             reads_2.write('\n')
 
 
-def run_art(input_fasta, depth, read_prefix, platform):
+def run_art(input_fasta, depth, read_prefix, args):
     """
     Runs ART and returns reads as list of list of strings.
     """
-    seq_sys = platform.split('_')[0]
-    read_length = platform.split('_')[1]
-    insert_size = min(500, int(read_length) * 3.5)
-    insert_stdev = max(50, insert_size // 8)
+
+    out_name = 'art_output_' + str(os.getpid())
 
     art_command = ['art_illumina',
-                   '--seqSys', seq_sys,
+                   '--seqSys', args.seq_sys,
                    '--in', input_fasta,
-                   '--len', read_length,
-                   '--mflen', str(insert_size),
-                   '--sdev', str(insert_stdev),
+                   '--len', str(args.read_length),
+                   '--mflen', str(args.insert_size),
+                   '--sdev', str(args.insert_stdev),
                    '--fcov', str(depth),
-                   '--out', 'art_output']
+                   '--out', out_name]
     try:
         subprocess.check_output(art_command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         sys.exit('ART encountered an error:\n' + e.output.decode())
 
-    output_fastq_1_filename = 'art_output1.fq'
-    output_fastq_2_filename = 'art_output2.fq'
+    output_fastq_1_filename = out_name + '1.fq'
+    output_fastq_2_filename = out_name + '2.fq'
     try:
         with open(output_fastq_1_filename, 'rt') as f:
             fastq_1_lines = f.read().splitlines()
@@ -186,10 +195,10 @@ def run_art(input_fasta, depth, read_prefix, platform):
     except FileNotFoundError:
         sys.exit('Could not find ART output read files')
 
-    os.remove('art_output1.fq')
-    os.remove('art_output2.fq')
-    os.remove('art_output1.aln')
-    os.remove('art_output2.aln')
+    os.remove(out_name + '1.fq')
+    os.remove(out_name + '2.fq')
+    os.remove(out_name + '1.aln')
+    os.remove(out_name + '2.aln')
 
     read_pairs = []
     i = 0

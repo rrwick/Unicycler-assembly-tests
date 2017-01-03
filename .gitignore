@@ -9,9 +9,8 @@
 __pycache__/
 *.py[cod]
 
-# Test sequences
-tests/*.fasta
-tests/*.fastq
+# Read files
+synthetic_reads/*.fastq.gz
 
 # Distribution and packaging
 build/

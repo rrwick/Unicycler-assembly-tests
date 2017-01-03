@@ -12,11 +12,11 @@ The `generate_illumina_reads` script is a wrapper for the [ART](https://www.nieh
 
 ##### Quality presets
 
-`--good` is equivalent to `--depth 40.0 --platform HS10_100` and will generate 100 bp reads with low and uneven depth. The resulting assembly graphs may contain many dead ends due to areas missing coverage.
+`--bad` is equivalent to `--depth 40.0 --platform HS10_100` and will generate 100 bp reads with low and uneven depth. The resulting assembly graph may contain many dead ends due to areas missing coverage.
 
-`--medium` is equivalent to `--depth 45.0 --platform HS25_125` and will generate 125 bp reads. The depth will probably be sufficient to cover the entire genome.
+`--medium` is equivalent to `--depth 40.0 --platform HS25_125` and will generate 125 bp reads. The depth will probably be sufficient to cover the entire genome.
 
-`--good` is equivalent to `--depth 80.0 --platform MSv3_250` and will generate 250 bp reads with abundant depth.
+`--good` is equivalent to `--depth 100.0 --platform HS25_150` and will generate 150 bp reads with abundant depth.
 
 
 
