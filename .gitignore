@@ -10,7 +10,7 @@ __pycache__/
 *.py[cod]
 
 # Read files
-synthetic_reads/*.fastq.gz
+synthetic_reads/*/*.fastq.gz
 
 # Distribution and packaging
 build/
