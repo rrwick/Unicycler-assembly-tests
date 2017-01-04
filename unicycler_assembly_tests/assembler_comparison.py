@@ -639,11 +639,14 @@ class Commands(object):
             stdout, _ = process.communicate()
             return stdout.decode().split('Version ')[1].split()[0]
         elif assembler_name == 'ABySS':
-            version_command = 'man -P cat abyss-pe'
-            process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
+            process = subprocess.Popen('which abyss-pe', stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
             stdout, _ = process.communicate()
-            return stdout.decode().split('(ABySS) ')[1].split()[0]
+            doc_path = os.path.abspath(stdout.decode().strip().replace('bin/abyss-pe',
+                                                                       'doc/abyss-pe.1'))
+            with open(doc_path, 'rt') as doc_file:
+                doc_data = doc_file.read()
+            return doc_data.split('abyss-pe (ABySS) ')[1].split()[0]
         elif assembler_name == 'Canu':
             version_command = self.get_assembler_program() + ' --version'
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
