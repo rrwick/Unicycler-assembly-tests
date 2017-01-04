@@ -319,9 +319,8 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
 
 
 def get_copied_fasta_name(read_set, commands, out_dir):
-    copied_fasta_name = (read_set.set_name + '_' + commands.get_assembler_name() + '_' +
-                         commands.get_assembler_version() + '_' +
-                         commands.get_assembly_fasta_name() +
+    copied_fasta_name = (read_set.set_name + '__' + commands.command_filename + '_' +
+                         commands.get_assembler_version() +
                          '.fasta')
     copied_fasta = os.path.join(out_dir, copied_fasta_name)
     return copied_fasta_name, copied_fasta
@@ -452,7 +451,7 @@ class FakeReadSet(object):
     def get_read_sets(self):
         read_sets = []
         for short_qual in ['bad', 'medium', 'good']:
-            short_read_set = ReadSet(self.set_name + '_' + short_qual + '_short')
+            short_read_set = ReadSet(self.set_name + '__' + short_qual + '_short')
             if short_qual == 'bad':
                 short_read_set.add_read(self.bad_short_reads_1)
                 short_read_set.add_read(self.bad_short_reads_2)
@@ -466,7 +465,7 @@ class FakeReadSet(object):
                 read_sets.append(short_read_set)
             for long_qual in ['bad', 'medium', 'good']:
                 hybrid_read_set = copy.deepcopy(short_read_set)
-                hybrid_read_set.set_name += '_' + long_qual + '_long'
+                hybrid_read_set.set_name += '__' + long_qual + '_long'
                 if long_qual == 'bad':
                     hybrid_read_set.add_read(self.bad_long_reads)
                 elif long_qual == 'medium':
@@ -487,6 +486,7 @@ class Commands(object):
         self.hybrid_assembly_commands = []
         self.final_assembly_fasta = None
         self.final_assembly_graph = None
+        self.command_filename = command_filename.split('/')[-1]
 
         final_assembly_files = []
         mode = None
@@ -654,13 +654,6 @@ class Commands(object):
         elif assembler_name == 'ABySS':
             return commands.split('k=')[1].split()[0]
         return ''
-
-    def get_assembly_fasta_name(self):
-        """
-        Returns 'contigs' or 'scaffolds' or something - needed for when one assembler (e.g.
-        SPAdes) makes more than one final assembly.
-        """
-        return self.final_assembly_fasta.split('/')[-1].split('-')[-1].split('.')[0]
 
 
 class TestResult(object):
