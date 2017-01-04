@@ -11,7 +11,6 @@ import os
 import subprocess
 import argparse
 import sys
-import gzip
 from unicycler_assembly_tests.misc import load_fasta, get_relative_depths
 
 
@@ -25,6 +24,7 @@ def main():
     print('  insert stdev: ' + str(args.insert_stdev))
     print('  output 1:     ' + str(args.short_1))
     print('  output 2:     ' + str(args.short_2))
+    print()
     make_fake_short_reads(args)
     print()
 
@@ -102,6 +102,8 @@ def make_fake_short_reads(args):
     # for the first read in the pair, the second four are for the second.
     short_read_pairs = []
 
+    print('\t'.join(['Reference', 'Length', 'Depth']))
+
     read_prefix = 1  # Used to prevent duplicate read names.
     for i, ref in enumerate(references):
 
@@ -109,6 +111,8 @@ def make_fake_short_reads(args):
 
         ref_seq = ref[1]
         circular = ref[3]
+
+        print('\t'.join([ref[0], str(len(ref_seq)), str(short_depth)]), flush=True)
 
         if circular:
             short_depth_per_rotation = short_depth / args.rotation_count
@@ -143,7 +147,14 @@ def make_fake_short_reads(args):
             read_prefix += 1
 
     random.shuffle(short_read_pairs)
-    with gzip.open(args.short_1, 'wt') as reads_1, gzip.open(args.short_2, 'wt') as reads_2:
+    gzip_after = args.short_1.endswith('.gz')
+    if gzip_after:
+        short_1 = args.short_1.replace('.gz', '')
+        short_2 = args.short_2.replace('.gz', '')
+    else:
+        short_1 = args.short_1
+        short_2 = args.short_2
+    with open(short_1, 'wt') as reads_1, open(short_2, 'wt') as reads_2:
         for i, read_pair in enumerate(short_read_pairs):
             read_name = '@short_read_' + str(i+1)
             reads_1.write(read_name + '/1')
@@ -162,6 +173,13 @@ def make_fake_short_reads(args):
             reads_2.write('\n')
             reads_2.write(read_pair[7])
             reads_2.write('\n')
+    if gzip_after:
+        process = subprocess.Popen(['gzip', short_1], stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        _, _ = process.communicate()
+        process = subprocess.Popen(['gzip', short_2], stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        _, _ = process.communicate()
 
 
 def run_art(input_fasta, depth, read_prefix, args):

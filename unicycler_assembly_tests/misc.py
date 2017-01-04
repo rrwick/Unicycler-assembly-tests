@@ -27,10 +27,7 @@ def load_fasta(filename):
             if line[0] == '>':  # Header line = start of new contig
                 if name:
                     seq_name = name.split()[0]
-                    try:
-                        relative_depth = float(name.split('depth=')[1].split()[0])
-                    except IndexError:
-                        relative_depth = 1.0
+                    relative_depth = float(name.split('depth=')[1].split()[0])
                     circular = 'circular=true' in name.lower()
                     fasta_seqs.append((seq_name, sequence, relative_depth, circular))
                     sequence = ''
@@ -38,13 +35,9 @@ def load_fasta(filename):
             else:
                 sequence += line
         if name:
-            name_parts = name.split()
-            seq_name = name_parts[0]
-            relative_depth = name_parts[1]
-            if len(name_parts) > 2 and name_parts[2] == 'linear':
-                circular = False
-            else:
-                circular = True
+            seq_name = name.split()[0]
+            relative_depth = float(name.split('depth=')[1].split()[0])
+            circular = 'circular=true' in name.lower()
             fasta_seqs.append((seq_name, sequence, relative_depth, circular))
     return fasta_seqs
 

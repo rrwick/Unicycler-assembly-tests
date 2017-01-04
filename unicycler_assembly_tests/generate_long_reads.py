@@ -20,7 +20,15 @@ from unicycler_assembly_tests.misc import load_fasta, load_one_read_from_fastq, 
 
 def main():
     args = get_args()
+    print()
+    print('Making fake long reads for ' + args.reference)
+    print('  read length:   ' + str(args.length))
+    print('  read identity: ' +
+          '%.1f' % (100.0 * args.id_alpha / (args.id_alpha + args.id_beta)) + '%')
+    print('  output:        ' + str(args.long))
+    print()
     make_fake_long_reads(args.reference, args.long, args.depth, args)
+    print()
 
 
 def get_args():
@@ -105,6 +113,9 @@ def get_args():
     if args.model_qc == 'model_qc_clr' and not os.path.isfile(args.model_qc):
         args.model_qc = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model_qc_clr')
     if not os.path.isfile(args.model_qc):
+        args.model_qc = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                     'model_qc_clr')
+    if not os.path.isfile(args.model_qc):
         sys.exit('Count not find ' + args.model_qc)
 
     return args
@@ -133,9 +144,10 @@ def save_ref_to_fasta(ref_seq, temp_fasta_filename):
 
 def make_fake_long_reads(reference, read_filename, depth, args):
     references = load_fasta(reference)
+
     relative_depths = get_relative_depths(reference)
 
-    print('\t'.join(['Read number', 'Length', 'Identity']))
+    print('\t'.join(['Reference', 'Length', 'Target depth', 'Final depth']))
 
     temp_fasta_filename = 'temp_' + str(os.getpid()) + '.fasta'
 
@@ -152,13 +164,14 @@ def make_fake_long_reads(reference, read_filename, depth, args):
         save_ref_to_fasta(ref_seq, temp_fasta_filename)
         circular = ref[3]
 
+        current_bases = 0
         current_depth = 0.0
+
+        print('\t'.join([ref[0], str(len(ref_seq)), str(target_depth)]), end='', flush=True)
 
         while current_depth < target_depth:
             read_length = get_read_length(args.length, args.length_sigma, args.length_max)
             read_id = get_read_identity(args.id_alpha, args.id_beta, args.id_max)
-
-            print('\t'.join([str(read_number), str(read_length), str(read_id)]))
 
             # Don't let the read length get longer than the actual sequence.
             if read_length > len(ref_seq):
@@ -167,15 +180,19 @@ def make_fake_long_reads(reference, read_filename, depth, args):
             # For circular sequences, we rotate the reference sequence.
             if circular:
                 random_start = random.randint(0, len(ref_seq) - 1)
-                rotated = ref_seq[random_start:] + ref_seq[:random_start]
-                save_ref_to_fasta(rotated, temp_fasta_filename)
+            else:
+                random_start = 0
+            rotated = ref_seq[random_start:] + ref_seq[:random_start]
+            save_ref_to_fasta(rotated, temp_fasta_filename)
 
             long_reads.append(run_pbsim(temp_fasta_filename, read_length, read_id, args,
                                         len(ref_seq)))
             os.remove(temp_fasta_filename)
 
             read_number += 1
-            current_depth = sum(len(x[0]) for x in long_reads) / len(ref_seq)
+            current_bases += read_length
+            current_depth = current_bases / len(ref_seq)
+        print('\t' + str(current_depth), flush=True)
 
     random.shuffle(long_reads)
     with gzip.open(read_filename, 'wt') as reads:
@@ -194,6 +211,8 @@ def run_pbsim(input_fasta, read_length, read_id, args, ref_len):
     # We only want one read, so adjust the depth to give us that.
     depth = 1.5 * read_length / ref_len
 
+    prefix = str(os.getpid())
+
     pbsim_command = ['pbsim',
                      '--depth', str(depth),
                      '--length-min', str(read_length),
@@ -207,15 +226,16 @@ def run_pbsim(input_fasta, read_length, read_id, args, ref_len):
                      '--model_qc', args.model_qc,
                      '--difference-ratio', '10:40:30',
                      '--seed', str(random.randint(0, 1000000)),
+                     '--prefix', prefix,
                      input_fasta]
 
     process = subprocess.Popen(pbsim_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, _ = process.communicate()
 
-    reads = load_one_read_from_fastq('sd_0001.fastq')
-    os.remove('sd_0001.fastq')
-    os.remove('sd_0001.maf')
-    os.remove('sd_0001.ref')
+    reads = load_one_read_from_fastq(prefix + '_0001.fastq')
+    os.remove(prefix + '_0001.fastq')
+    os.remove(prefix + '_0001.maf')
+    os.remove(prefix + '_0001.ref')
 
     return reads
 
