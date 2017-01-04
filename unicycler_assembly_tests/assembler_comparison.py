@@ -621,14 +621,16 @@ class Commands(object):
             version_command = self.get_assembler_program() + ' --version'
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
-            stdout, _ = process.communicate()
-            return stdout.decode().split('v')[1].split()[0]
+            stdout, stderr = process.communicate()
+            all_out = stdout.decode() + ' ' + stderr.decode()
+            return all_out.split('v')[1].split()[0]
         elif assembler_name == 'SPAdes':
             version_command = self.get_assembler_program() + ' --version'
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
-            _, stderr = process.communicate()
-            version = stderr.decode().split(' v')[1].split()[0]
+            stdout, stderr = process.communicate()
+            all_out = stdout.decode() + ' ' + stderr.decode()
+            version = all_out.split(' v')[1].split()[0]
             if version.startswith('.'):
                 version = version[1:]
             return version
@@ -636,8 +638,9 @@ class Commands(object):
             version_command = self.get_assembler_program()
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
-            stdout, _ = process.communicate()
-            return stdout.decode().split('Version ')[1].split()[0]
+            stdout, stderr = process.communicate()
+            all_out = stdout.decode() + ' ' + stderr.decode()
+            return all_out.split('Version ')[1].split()[0]
         elif assembler_name == 'ABySS':
             process = subprocess.Popen('which abyss-pe', stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
@@ -651,14 +654,16 @@ class Commands(object):
             version_command = self.get_assembler_program() + ' --version'
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
-            stdout, _ = process.communicate()
-            return stdout.decode().split('v')[1].split()[0]
+            stdout, stderr = process.communicate()
+            all_out = stdout.decode() + ' ' + stderr.decode()
+            return all_out.split('v')[1].split()[0]
         elif assembler_name == 'npScarf':
             version_command = self.get_assembler_program().replace('jsa.np.gapcloser', 'jsa')
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
-            stdout, _ = process.communicate()
-            return stdout.decode().split('Version ')[1].split(',')[0]
+            stdout, stderr = process.communicate()
+            all_out = stdout.decode() + ' ' + stderr.decode()
+            return all_out.split('Version ')[1].split(',')[0]
 
     def get_kmer_size(self):
         assembler_name = self.get_assembler_name()
