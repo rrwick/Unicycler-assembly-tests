@@ -13,7 +13,7 @@ export PATH="/vlsci/SG0006/rwick/abyss-2.0.2/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/abyss_scaffolds"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/abyss_64_scaffolds"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
 OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"
