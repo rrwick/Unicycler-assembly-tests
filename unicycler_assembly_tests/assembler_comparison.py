@@ -500,6 +500,10 @@ class Commands(object):
         self.final_assembly_graph = None
         self.command_filename = command_filename.split('/')[-1]
 
+        # Remove 'old' parts of the filename - they'll just clutter it up.
+        self.command_filename = '_'.join([x for x in self.command_filename.split('_')
+                                          if 'old' not in x])
+
         final_assembly_files = []
         mode = None
         with open(command_filename, 'rt') as command_file:
@@ -624,7 +628,10 @@ class Commands(object):
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
             _, stderr = process.communicate()
-            return stderr.decode().split('v')[1].split()[0]
+            version = stderr.decode().split(' v')[1].split()[0]
+            if version.startswith('.'):
+                version = version[1:]
+            return version
         elif assembler_name == 'Velvet':
             version_command = self.get_assembler_program()
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
