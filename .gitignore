@@ -12,6 +12,9 @@ __pycache__/
 # Read files
 synthetic_reads/*/*.fastq.gz
 
+# SLURM output
+slurm_scripts/slurm-*.out
+
 # Distribution and packaging
 build/
 develop-eggs/
