@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p sysgen
 #SBATCH --nodes=1
-#SBATCH --job-name="SPAdes contigs 3.9.1 assembler comparison"
+#SBATCH --job-name="ABySS contigs 2.0.2 assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
@@ -9,11 +9,11 @@
 
 module load Python/3.5.2-vlsci_intel-2015.08.25
 
-export PATH="/vlsci/SG0006/rwick/SPAdes-3.9.1-Linux/bin:$PATH"
+export PATH="/vlsci/SG0006/rwick/abyss-2.0.2/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/spades_contigs"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/abyss_contigs"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
 OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"

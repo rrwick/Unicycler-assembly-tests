@@ -10,7 +10,7 @@
 
 
 # Short read assembly commands
-unicycler-runner.py -1 SHORT_READS_1 -2 SHORT_READS_2 -o output --mode normal --threads 8
+unicycler-runner.py -1 SHORT_READS_1 -2 SHORT_READS_2 --no_long -o output --mode normal --threads 8
 
 # Hybrid assembly commands
 unicycler-runner.py -1 SHORT_READS_1 -2 SHORT_READS_2 -l LONG_READS -o output --mode normal --threads 8

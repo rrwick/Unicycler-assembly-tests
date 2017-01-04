@@ -10,11 +10,8 @@
 
 
 # Short read assembly commands
-unicycler-runner.py -1 SHORT_READS_1 -2 SHORT_READS_2 -o output --mode normal --threads 8
-
-# Hybrid assembly commands
-unicycler-runner.py -1 SHORT_READS_1 -2 SHORT_READS_2 -l LONG_READS -o output --mode normal --threads 8
+spades.py -1 SHORT_READS_1 -2 SHORT_READS_2 -o output --careful --threads 8
 
 # Final assembly files
-output/assembly.gfa
-output/assembly.fasta
+output/before_rr.fasta
+output/assembly_graph.fastg
