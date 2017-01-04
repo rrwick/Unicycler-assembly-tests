@@ -13,7 +13,8 @@ __pycache__/
 synthetic_reads/*/*.fastq.gz
 
 # SLURM output
-slurm_scripts/slurm-*.out
+slurm_scripts_helix/slurm-*.out
+slurm_scripts_barcoo/slurm-*.out
 
 # Distribution and packaging
 build/

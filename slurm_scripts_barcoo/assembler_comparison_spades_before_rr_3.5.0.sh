@@ -1,24 +1,19 @@
 #!/bin/bash
-#SBATCH -p sysgen
+#SBATCH -p main
 #SBATCH --nodes=1
-#SBATCH --job-name="Unicycler conservative 0.2.0 assembler comparison"
+#SBATCH --job-name="SPAdes before RR 3.5.0 assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
-#SBATCH --time=10-0:0:00
+#SBATCH --time=1-0:0:00
 
-module load SAMtools/1.3.1-vlsci_intel-2015.08.25-HTSlib-1.3.1
-module load Bowtie2/2.2.9-vlsci_intel-2015.08.25
-module load Java/1.8.0_60
-module load BLAST+/2.2.30-vlsci_intel-2015.08.25-Python-2.7.10
-module load Python/3.5.2-vlsci_intel-2015.08.25
+module load python-gcc/3.5.1
 
-export PATH="/vlsci/SG0006/rwick/SPAdes-3.9.1-Linux/bin:$PATH"
-export PATH="/vlsci/SG0006/rwick/unicycler_v0.2.0:$PATH"
+export PATH="/vlsci/SG0006/rwick/SPAdes-3.5.0-Linux/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/unicycler_conservative"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/spades_old1_before_rr"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
 OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"
