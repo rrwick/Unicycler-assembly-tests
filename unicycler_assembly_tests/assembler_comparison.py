@@ -36,6 +36,18 @@ def main():
     assembly_dir = os.path.join(args.out_dir, 'ASSEMBLY_TEMP_' + str(os.getpid()))
     create_results_table(args.out_dir)
 
+    # Remove read sets this assembler can't handle. E.g. if it's a hybrid read set and a short
+    # read only assembler.
+    can_do_short_only = bool(commands.short_read_assembly_commands)
+    can_do_hybrid = bool(commands.hybrid_assembly_commands)
+    filtered_read_sets = []
+    for read_set in read_sets:
+        if read_set.get_set_type() == 'short-only' and can_do_short_only:
+            filtered_read_sets.append(read_set)
+        elif read_set.get_set_type() == 'hybrid' and can_do_hybrid:
+            filtered_read_sets.append(read_set)
+    read_sets = filtered_read_sets
+
     if args.ref_dir:
         for read_set in read_sets:
             read_set.find_reference(args.ref_dir)
