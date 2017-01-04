@@ -49,6 +49,12 @@ def main():
     print()
 
     for read_set in read_sets:
+        # Don't bother if the file already exists. This lets us resume crashed/stopped runs
+        # without repeating too much work.
+        _, copied_fasta = get_copied_fasta_name(read_set, commands, args.out_dir)
+        if os.path.isfile(copied_fasta):
+            continue
+
         os.makedirs(assembly_dir)
         assembly_time, assembly_stdout = execute_commands(commands, read_set, assembly_dir)
         evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_stdout,
@@ -194,9 +200,7 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     final_fasta = os.path.join(assembly_dir, commands.final_assembly_fasta)
     if not os.path.isfile(final_fasta):
         sys.exit('Error: could not find ' + final_fasta)
-    copied_fasta_name = (read_set.set_name + '_' + commands.get_assembler_name() + '_' +
-                         commands.get_assembler_version() + '.fasta')
-    copied_fasta = os.path.join(out_dir, copied_fasta_name)
+    copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
     shutil.copy(final_fasta, copied_fasta)
     if commands.final_assembly_graph:
         final_graph = os.path.join(assembly_dir, commands.final_assembly_graph)
@@ -243,12 +247,15 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     result.results['Assembler version'] = commands.get_assembler_version()
 
     if read_set.get_set_type() == 'short-only':
-        result.results['Assembly command(s)'] = '; '.join(commands.short_read_assembly_commands)
+        commands_str = '; '.join(commands.get_short_read_assembly_commands(read_set))
     else:
-        result.results['Assembly command(s)'] = '; '.join(commands.hybrid_assembly_commands)
+        commands_str = '; '.join(commands.get_hybrid_assembly_commands(read_set))
+    result.results['Assembly command(s)'] = commands_str
+
     result.results['Assembly kmer size'] = commands.get_kmer_size()
     result.results['Assembly time (seconds)'] = '%.1f' % assembly_time
     result.results['Assembly FASTA'] = copied_fasta
+
     if copied_graph:
         result.results['Assembly graph'] = copied_graph
         graph = unicycler.assembly_graph.AssemblyGraph(copied_graph, 0)
@@ -308,6 +315,13 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         fcntl.flock(table, fcntl.LOCK_EX)
         table.write(results_line)
         fcntl.flock(table, fcntl.LOCK_UN)
+
+
+def get_copied_fasta_name(read_set, commands, out_dir):
+    copied_fasta_name = (read_set.set_name + '_' + commands.get_assembler_name() + '_' +
+                         commands.get_assembler_version() + '.fasta')
+    copied_fasta = os.path.join(out_dir, copied_fasta_name)
+    return copied_fasta_name, copied_fasta
 
 
 def run_quast(fasta, read_set, out_dir, result):
@@ -508,18 +522,37 @@ class Commands(object):
 
     def get_short_read_assembly_commands(self, read_set):
         substituted_commands = []
+
+        ref_seqs = load_fasta(read_set.reference)
+        expected_linear_seqs = sum(0 if x[3] else 1 for x in ref_seqs)
+        total_ref_length = sum(len(x[1]) for x in ref_seqs)
+        assembler_name = self.get_assembler_name()
+
         for line in self.short_read_assembly_commands:
-            line = line.replace('SHORT_READS_1',read_set.short_reads_1)
-            line = line.replace('SHORT_READS_2',read_set.short_reads_2)
+            line = line.replace('SHORT_READS_1', read_set.short_reads_1)
+            line = line.replace('SHORT_READS_2', read_set.short_reads_2)
+            line = line.replace('GENOME_SIZE', str(total_ref_length))
+            if assembler_name == 'Unicycler' and expected_linear_seqs:
+                line += ' --expected_linear_seqs ' + str(expected_linear_seqs)
             substituted_commands.append(line)
+
         return substituted_commands
 
     def get_hybrid_assembly_commands(self, read_set):
         substituted_commands = []
+
+        ref_seqs = load_fasta(read_set.reference)
+        expected_linear_seqs = sum(0 if x[3] else 1 for x in ref_seqs)
+        total_ref_length = sum(len(x[1]) for x in ref_seqs)
+        assembler_name = self.get_assembler_name()
+
         for line in self.hybrid_assembly_commands:
-            line = line.replace('SHORT_READS_1',read_set.short_reads_1)
+            line = line.replace('SHORT_READS_1',  read_set.short_reads_1)
             line = line.replace('SHORT_READS_2',read_set.short_reads_2)
-            line = line.replace('LONG_READS',read_set.long_reads)
+            line = line.replace('LONG_READS', read_set.long_reads)
+            line = line.replace('GENOME_SIZE', str(total_ref_length))
+            if assembler_name == 'Unicycler' and expected_linear_seqs:
+                line += ' --expected_linear_seqs ' + str(expected_linear_seqs)
             substituted_commands.append(line)
         return substituted_commands
 
