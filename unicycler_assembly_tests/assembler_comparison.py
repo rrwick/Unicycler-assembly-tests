@@ -46,13 +46,17 @@ def main():
         print('  None')
     for read_set in read_sets:
         print('  ' + str(read_set))
-    print()
+    print('', flush=True)
 
     for read_set in read_sets:
+        print()
+        print(bold_yellow_underline('Read set: ' + read_set.set_name))
+
         # Don't bother if the file already exists. This lets us resume crashed/stopped runs
         # without repeating too much work.
         _, copied_fasta = get_copied_fasta_name(read_set, commands, args.out_dir)
         if os.path.isfile(copied_fasta):
+            print('Already done')
             continue
 
         os.makedirs(assembly_dir)
@@ -175,19 +179,16 @@ def execute_commands(commands, read_set, assembly_dir):
     starting_dir = os.getcwd()
     os.chdir(assembly_dir)
 
-    print()
-    print(bold_yellow_underline('Read set: ' + read_set.set_name))
-
     start_time = time.time()
     all_stdout = ''
     for command in set_commands:
-        print(command)
+        print(command, flush=True)
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    shell=True)
         stdout, stderr = process.communicate()
         if stderr:
             sys.exit(stderr.decode())
-        print()
+        print('', flush=True)
         all_stdout += stdout.decode()
         all_stdout += '\n'
     assembly_time = time.time() - start_time
@@ -319,7 +320,9 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
 
 def get_copied_fasta_name(read_set, commands, out_dir):
     copied_fasta_name = (read_set.set_name + '_' + commands.get_assembler_name() + '_' +
-                         commands.get_assembler_version() + '.fasta')
+                         commands.get_assembler_version() + '_' +
+                         commands.get_assembly_fasta_name() +
+                         '.fasta')
     copied_fasta = os.path.join(out_dir, copied_fasta_name)
     return copied_fasta_name, copied_fasta
 
@@ -651,6 +654,13 @@ class Commands(object):
         elif assembler_name == 'ABySS':
             return commands.split('k=')[1].split()[0]
         return ''
+
+    def get_assembly_fasta_name(self):
+        """
+        Returns 'contigs' or 'scaffolds' or something - needed for when one assembler (e.g.
+        SPAdes) makes more than one final assembly.
+        """
+        return self.final_assembly_fasta.split('/')[-1].split('-')[-1].split('.')[0]
 
 
 class TestResult(object):
