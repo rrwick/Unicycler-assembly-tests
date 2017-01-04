@@ -11,7 +11,6 @@ module load Python/3.5.2-vlsci_intel-2015.08.25
 module load BWA/0.7.15-iccifort-2015.2.164-GCC-4.9.2
 module load Java/1.8.0_60
 
-export JSA_CP="/vlsci/SG0006/rwick/japsa_v1.6-10a/lib/japsa:$JSA_CP"
 export PATH="/vlsci/SG0006/rwick/japsa_v1.6-10a/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/SPAdes-3.9.1-Linux/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"

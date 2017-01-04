@@ -7,6 +7,10 @@
 #SBATCH --mem=32762
 #SBATCH --time=10-0:0:00
 
+module load SAMtools/1.3.1-vlsci_intel-2015.08.25-HTSlib-1.3.1
+module load Bowtie2/2.2.9-vlsci_intel-2015.08.25
+module load Java/1.8.0_60
+module load BLAST+/2.2.30-vlsci_intel-2015.08.25-Python-2.7.10
 module load Python/3.5.2-vlsci_intel-2015.08.25
 
 export PATH="/vlsci/SG0006/rwick/SPAdes-3.9.1-Linux/bin:$PATH"
