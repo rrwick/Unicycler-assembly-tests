@@ -19,7 +19,7 @@ export PATH="/vlsci/SG0006/rwick/unicycler_v0.1.0:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4-barcoo:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/unicycler_old_bold"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/unicycler1_bold"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
 OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"

@@ -13,7 +13,7 @@ export PATH="/vlsci/SG0006/rwick/SPAdes-3.7.1-Linux/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4-barcoo:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/spades_scaffolds"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/spades4_scaffolds"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
 OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"
