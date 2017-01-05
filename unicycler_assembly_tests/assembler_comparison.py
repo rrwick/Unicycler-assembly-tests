@@ -265,8 +265,14 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         result.results['Assembly result'] = 'success'
         print(green('assembly succeeded'))
 
+    copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
+    assembly_stdout_filename = os.path.join(out_dir,
+                                            copied_fasta_name.replace('.fasta', '.out'))
+    with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
+        assembly_stdout_file.write(assembly_stdout)
+    print('OUTPUT ->', assembly_stdout_filename)
+
     if not failed:
-        copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
         shutil.copy(final_fasta, copied_fasta)
         print(final_fasta, '->', copied_fasta)
 
@@ -286,12 +292,6 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
             print(final_graph, '->', copied_graph)
         else:
             copied_graph = None
-
-        assembly_stdout_filename = os.path.join(out_dir,
-                                                copied_fasta_name.replace('.fasta', '.out'))
-        with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
-            assembly_stdout_file.write(assembly_stdout)
-        print('OUTPUT ->', assembly_stdout_filename)
 
         result.results['Assembly time (seconds)'] = '%.1f' % assembly_time
         result.results['Assembly FASTA'] = copied_fasta.split('/')[-1]
