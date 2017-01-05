@@ -344,7 +344,10 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
             # To be classed as 'Completely perfect', the assembly needs no mistakes at all.
             mismatches = float(result.results['# mismatches per 100 kbp'])
             indels = float(result.results['# indels per 100 kbp'])
-            if structurally_perfect == 'yes' and mismatches == 0.0 and indels == 0.0:
+            ref_total_length = int(result.results['Reference total length'])
+            assembly_total_length = int(result.results['Total length'])
+            if structurally_perfect == 'yes' and mismatches == 0.0 and indels == 0.0 and \
+                    ref_total_length == assembly_total_length:
                 completely_perfect = 'yes'
             else:
                 completely_perfect = 'no'
