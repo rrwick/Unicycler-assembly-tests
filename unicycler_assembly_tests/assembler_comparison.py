@@ -745,7 +745,7 @@ class Commands(object):
                                                                        'doc/abyss-pe.1'))
             with open(doc_path, 'rt') as doc_file:
                 doc_data = doc_file.read()
-            return doc_data.split('abyss-pe (ABySS) ')[1].split()[0]
+            return doc_data.split('abyss-pe (ABySS) ')[1].split()[0].replace('"', '')
         elif assembler_name == 'Canu':
             version_command = self.get_assembler_program() + ' --version'
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
