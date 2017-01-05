@@ -687,6 +687,8 @@ class Commands(object):
                 return 'contigs'
             elif 'scaffolds' in self.final_assembly_fasta:
                 return 'scaffolds'
+            elif 'before_rr' in self.final_assembly_fasta:
+                return 'before_rr'
         return ''
 
     def get_assembler_program(self):
