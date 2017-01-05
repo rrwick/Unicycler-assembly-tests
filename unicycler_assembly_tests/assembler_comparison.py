@@ -256,6 +256,10 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         if length == 0:
             failed = True
             print(red('assembly failed: ' + final_fasta + ' is empty'))
+        elif length < 100000:
+            failed = True
+            print(red('assembly failed: ' + final_fasta + ' contains only ' +
+                      str(length) + ' bp'))
         else:
             failed = False
 
