@@ -196,14 +196,11 @@ def execute_commands(commands, read_set, assembly_dir):
     all_stdout = ''
     for command in set_commands:
         print(command, flush=True)
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    shell=True)
-        stdout, stderr = process.communicate()
-        if stderr:
-            sys.exit(stderr.decode())
+        stdout, _ = process.communicate()
         print('', flush=True)
         all_stdout += stdout.decode()
-        all_stdout += '\n'
     assembly_time = time.time() - start_time
 
     os.chdir(starting_dir)
@@ -211,31 +208,6 @@ def execute_commands(commands, read_set, assembly_dir):
 
 
 def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_stdout, out_dir):
-    final_fasta = os.path.join(assembly_dir, commands.final_assembly_fasta)
-    if not os.path.isfile(final_fasta):
-        sys.exit('Error: could not find ' + final_fasta)
-    copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
-    shutil.copy(final_fasta, copied_fasta)
-    if commands.final_assembly_graph:
-        final_graph = os.path.join(assembly_dir, commands.final_assembly_graph)
-        if not os.path.isfile(final_graph):
-            sys.exit('Error: could not find ' + final_graph)
-        if final_graph.endswith('.gfa'):
-            extension = 'gfa'
-        elif final_graph.endswith('.fastg'):
-            extension = 'fastg'
-        else:
-            sys.exit('Error: assembly graph must be gfa or fastg')
-        copied_graph_name = copied_fasta_name.replace('.fasta', '.' + extension)
-        copied_graph = os.path.join(out_dir, copied_graph_name)
-        shutil.copy(final_graph, copied_graph)
-    else:
-        copied_graph = None
-
-    assembly_stdout_filename = os.path.join(out_dir, copied_fasta_name.replace('.fasta', '.out'))
-    with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
-        assembly_stdout_file.write(assembly_stdout)
-
     result = TestResult()
     result.results['Read set name'] = read_set.set_name
     result.results['Read set type'] = read_set.get_set_type()
@@ -272,61 +244,101 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     result.results['Assembly command(s)'] = commands_str
 
     result.results['Assembly kmer size'] = commands.get_kmer_size()
-    result.results['Assembly time (seconds)'] = '%.1f' % assembly_time
-    result.results['Assembly FASTA'] = copied_fasta
 
-    if copied_graph:
-        result.results['Assembly graph'] = copied_graph
-        graph = unicycler.assembly_graph.AssemblyGraph(copied_graph, 0)
-        dead_ends = graph.total_dead_end_count()
-        result.results['Dead ends'] = dead_ends
-        try:
-            result.results['Percent dead ends'] = '%.2f' % (100.0 * dead_ends / len(graph.segments))
-        except ZeroDivisionError:
-            pass
+    # Check to see that the final FASTA exists and contains sequence.
+    final_fasta = os.path.join(assembly_dir, commands.final_assembly_fasta)
+    if not os.path.isfile(final_fasta):
+        failed = True
+    else:
+        seqs = load_fasta(final_fasta)
+        length = str(sum(len(x[1]) for x in seqs))
+        failed = (length == 0)
 
-    run_quast(copied_fasta, read_set, out_dir, result)
+    if failed:
+        result.results['Assembly result'] = 'fail'
+    else:
+        result.results['Assembly result'] = 'success'
 
-    if read_set.reference:
-        # Get total misassemblies in addition to extensive/local.
-        extensive_misassemblies = int(result.results['# misassemblies'])
-        local_misassemblies = int(result.results['# local misassemblies'])
-        total_misassemblies = extensive_misassemblies + local_misassemblies
-        result.results['Total misassemblies'] = str(total_misassemblies)
-
-        # The assembly is considered complete if the number of contigs matches the reference contig
-        # count and the largest contigs matches the largest reference to 10%.
-        count_match = (ref_count == int(result.results['# contigs']))
-        longest_contig_diff = abs(longest_ref - int(result.results['Largest contig']))
-        try:
-            longest_match = (longest_contig_diff / longest_ref < 0.1)
-        except ZeroDivisionError:
-            longest_match = False
-
-        if count_match and longest_match:
-            complete = 'yes'
+    if not failed:
+        copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
+        shutil.copy(final_fasta, copied_fasta)
+        if commands.final_assembly_graph:
+            final_graph = os.path.join(assembly_dir, commands.final_assembly_graph)
+            if not os.path.isfile(final_graph):
+                sys.exit('Error: could not find ' + final_graph)
+            if final_graph.endswith('.gfa'):
+                extension = 'gfa'
+            elif final_graph.endswith('.fastg'):
+                extension = 'fastg'
+            else:
+                sys.exit('Error: assembly graph must be gfa or fastg')
+            copied_graph_name = copied_fasta_name.replace('.fasta', '.' + extension)
+            copied_graph = os.path.join(out_dir, copied_graph_name)
+            shutil.copy(final_graph, copied_graph)
         else:
-            complete = 'no'
-        result.results['Complete'] = complete
+            copied_graph = None
 
-        # To be classed as 'Structurally perfect', the assembly needs no mistakes and nothing extra
-        # (mismatches and small indels are still okay).
-        unaligned_length = int(result.results['Unaligned length'])
-        if complete == 'yes' and total_misassemblies == 0 and unaligned_length == 0 and \
-                float(result.results['Duplication ratio']) == 1.0:
-            structurally_perfect = 'yes'
-        else:
-            structurally_perfect = 'no'
-        result.results['Structurally perfect'] = structurally_perfect
+        assembly_stdout_filename = os.path.join(out_dir,
+                                                copied_fasta_name.replace('.fasta', '.out'))
+        with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
+            assembly_stdout_file.write(assembly_stdout)
 
-        # To be classed as 'Completely perfect', the assembly needs no mistakes at all.
-        mismatches = float(result.results['# mismatches per 100 kbp'])
-        indels = float(result.results['# indels per 100 kbp'])
-        if structurally_perfect == 'yes' and mismatches == 0.0 and indels == 0.0:
-            completely_perfect = 'yes'
-        else:
-            completely_perfect = 'no'
-        result.results['Completely perfect'] = completely_perfect
+        result.results['Assembly time (seconds)'] = '%.1f' % assembly_time
+        result.results['Assembly FASTA'] = copied_fasta
+
+        if copied_graph:
+            result.results['Assembly graph'] = copied_graph
+            graph = unicycler.assembly_graph.AssemblyGraph(copied_graph, 0)
+            dead_ends = graph.total_dead_end_count()
+            result.results['Dead ends'] = dead_ends
+            try:
+                result.results['Percent dead ends'] = '%.2f' % (100.0 * dead_ends /
+                                                                len(graph.segments))
+            except ZeroDivisionError:
+                pass
+
+        run_quast(copied_fasta, read_set, out_dir, result)
+
+        if read_set.reference:
+            # Get total misassemblies in addition to extensive/local.
+            extensive_misassemblies = int(result.results['# misassemblies'])
+            local_misassemblies = int(result.results['# local misassemblies'])
+            total_misassemblies = extensive_misassemblies + local_misassemblies
+            result.results['Total misassemblies'] = str(total_misassemblies)
+
+            # The assembly is considered complete if the number of contigs matches the reference
+            # contig count and the largest contigs matches the largest reference to 10%.
+            count_match = (ref_count == int(result.results['# contigs']))
+            longest_contig_diff = abs(longest_ref - int(result.results['Largest contig']))
+            try:
+                longest_match = (longest_contig_diff / longest_ref < 0.1)
+            except ZeroDivisionError:
+                longest_match = False
+
+            if count_match and longest_match:
+                complete = 'yes'
+            else:
+                complete = 'no'
+            result.results['Complete'] = complete
+
+            # To be classed as 'Structurally perfect', the assembly needs no mistakes and nothing
+            # extra (mismatches and small indels are still okay).
+            unaligned_length = int(result.results['Unaligned length'])
+            if complete == 'yes' and total_misassemblies == 0 and unaligned_length == 0 and \
+                    float(result.results['Duplication ratio']) == 1.0:
+                structurally_perfect = 'yes'
+            else:
+                structurally_perfect = 'no'
+            result.results['Structurally perfect'] = structurally_perfect
+
+            # To be classed as 'Completely perfect', the assembly needs no mistakes at all.
+            mismatches = float(result.results['# mismatches per 100 kbp'])
+            indels = float(result.results['# indels per 100 kbp'])
+            if structurally_perfect == 'yes' and mismatches == 0.0 and indels == 0.0:
+                completely_perfect = 'yes'
+            else:
+                completely_perfect = 'no'
+            result.results['Completely perfect'] = completely_perfect
 
     results_line = '\t'.join([str(x) for x in result.results.values()]) + '\n'
     results_table = os.path.join(out_dir, 'results.tsv')
@@ -590,7 +602,7 @@ class Commands(object):
 
         for line in self.hybrid_assembly_commands:
             line = line.replace('SHORT_READS_1',  read_set.short_reads_1)
-            line = line.replace('SHORT_READS_2',read_set.short_reads_2)
+            line = line.replace('SHORT_READS_2', read_set.short_reads_2)
             line = line.replace('LONG_READS', read_set.long_reads)
             line = line.replace('GENOME_SIZE', str(total_ref_length))
             if assembler_name == 'Unicycler' and expected_linear_seqs:
@@ -726,6 +738,7 @@ class TestResult(object):
         self.results['Assembler version'] = ''
         self.results['Assembly command(s)'] = ''
         self.results['Assembly kmer size'] = ''
+        self.results['Assembly result'] = ''
         self.results['Assembly time (seconds)'] = ''
         self.results['Assembly FASTA'] = ''
         self.results['Assembly graph'] = ''
