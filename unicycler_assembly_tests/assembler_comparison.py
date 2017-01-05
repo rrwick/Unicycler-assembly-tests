@@ -34,7 +34,7 @@ def main():
 
     commands = Commands(args.command_file)
     assembly_dir = os.path.join(args.out_dir, 'ASSEMBLY_TEMP_' + str(os.getpid()))
-    print('Assembly temp directory: ' + assembly_dir + '\n\n')
+    print('\nAssembly temp directory: ' + assembly_dir + '\n')
     create_results_table(args.out_dir)
 
     # Remove read sets this assembler can't handle. E.g. if it's a hybrid read set and a short
@@ -256,12 +256,16 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
 
     if failed:
         result.results['Assembly result'] = 'fail'
+        print(red('assembly failed'))
     else:
         result.results['Assembly result'] = 'success'
+        print(green('assembly succeeded'))
 
     if not failed:
         copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
         shutil.copy(final_fasta, copied_fasta)
+        print(final_fasta, '->', copied_fasta)
+
         if commands.final_assembly_graph:
             final_graph = os.path.join(assembly_dir, commands.final_assembly_graph)
             if not os.path.isfile(final_graph):
@@ -275,6 +279,7 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
             copied_graph_name = copied_fasta_name.replace('.fasta', '.' + extension)
             copied_graph = os.path.join(out_dir, copied_graph_name)
             shutil.copy(final_graph, copied_graph)
+            print(final_graph, '->', copied_graph)
         else:
             copied_graph = None
 
@@ -282,6 +287,7 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
                                                 copied_fasta_name.replace('.fasta', '.out'))
         with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
             assembly_stdout_file.write(assembly_stdout)
+        print('OUTPUT ->', assembly_stdout_filename)
 
         result.results['Assembly time (seconds)'] = '%.1f' % assembly_time
         result.results['Assembly FASTA'] = copied_fasta
@@ -346,6 +352,7 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         fcntl.flock(table, fcntl.LOCK_EX)
         table.write(results_line)
         fcntl.flock(table, fcntl.LOCK_UN)
+    print()
 
 
 def get_copied_fasta_name(read_set, commands, out_dir):
@@ -360,11 +367,15 @@ def run_quast(fasta, read_set, out_dir, result):
     quast_dir = os.path.join(out_dir, 'QUAST_TEMP_' + str(os.getpid()))
 
     quast_command = ['quast.py', fasta]
+
     if read_set.reference:
         quast_command += ['-R', read_set.reference]
+
     quast_command += ['-o', quast_dir,
                       '-l', '"' + read_set.set_name.replace(',', '') + '"',
                       '--no-plots', '--strict-NA']
+    print()
+    print(' '.join(quast_command))
     process = subprocess.Popen(quast_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, _ = process.communicate()
 
@@ -396,6 +407,14 @@ def bold_yellow_underline(text):
 
 def bold(text):
     return BOLD + text + END_FORMATTING
+
+
+def red(text):
+    return RED + text + END_FORMATTING
+
+
+def green(text):
+    return GREEN + text + END_FORMATTING
 
 
 class ReadSet(object):
@@ -434,6 +453,9 @@ class ReadSet(object):
             return 'hybrid'
 
     def find_reference(self, ref_dir):
+        # Only use a reference for fake read sets (where the 'truth' is exactly known).
+        if not self.fake:
+            return
         ref_filenames = [f for f in os.listdir(ref_dir)
                          if os.path.isfile(os.path.join(ref_dir, f)) and
                          (f.endswith('.fasta') or f.endswith('.fasta.gz'))]
@@ -577,11 +599,15 @@ class Commands(object):
     def get_short_read_assembly_commands(self, read_set):
         substituted_commands = []
 
-        ref_seqs = load_fasta(read_set.reference)
-        expected_linear_seqs = sum(0 if x[3] else 1 for x in ref_seqs)
-        total_ref_length = sum(len(x[1]) for x in ref_seqs)
-        assembler_name = self.get_assembler_name()
+        if read_set.reference:
+            ref_seqs = load_fasta(read_set.reference)
+            expected_linear_seqs = sum(0 if x[3] else 1 for x in ref_seqs)
+            total_ref_length = sum(len(x[1]) for x in ref_seqs)
+        else:
+            expected_linear_seqs = 0
+            total_ref_length = 5000000
 
+        assembler_name = self.get_assembler_name()
         for line in self.short_read_assembly_commands:
             line = line.replace('SHORT_READS_1', read_set.short_reads_1)
             line = line.replace('SHORT_READS_2', read_set.short_reads_2)

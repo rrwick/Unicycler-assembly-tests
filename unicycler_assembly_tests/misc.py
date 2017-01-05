@@ -36,7 +36,10 @@ def load_fasta(filename):
                 sequence += line
         if name:
             seq_name = name.split()[0]
-            relative_depth = float(name.split('depth=')[1].split()[0])
+            try:
+                relative_depth = float(name.split('depth=')[1].split()[0])
+            except IndexError:
+                relative_depth = 1.0
             circular = 'circular=true' in name.lower()
             fasta_seqs.append((seq_name, sequence, relative_depth, circular))
     return fasta_seqs
