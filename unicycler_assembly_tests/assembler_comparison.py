@@ -251,7 +251,7 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         failed = True
     else:
         seqs = load_fasta(final_fasta)
-        length = str(sum(len(x[1]) for x in seqs))
+        length = sum(len(x[1]) for x in seqs)
         failed = (length == 0)
 
     if failed:
