@@ -28,7 +28,7 @@ def load_fasta(filename):
                 if name:
                     seq_name = name.split()[0]
                     try:
-                        relative_depth = float(name.split('depth=')[1].split()[0])
+                        relative_depth = float(name.split('depth=')[1].split()[0].replace('x', ''))
                     except IndexError:
                         relative_depth = 1.0
                     circular = 'circular=true' in name.lower()
@@ -40,7 +40,7 @@ def load_fasta(filename):
         if name:
             seq_name = name.split()[0]
             try:
-                relative_depth = float(name.split('depth=')[1].split()[0])
+                relative_depth = float(name.split('depth=')[1].split()[0].replace('x', ''))
             except IndexError:
                 relative_depth = 1.0
             circular = 'circular=true' in name.lower()
