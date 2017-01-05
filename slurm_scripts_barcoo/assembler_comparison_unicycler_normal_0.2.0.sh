@@ -15,7 +15,7 @@ module load python-gcc/3.5.1
 
 export PATH="/vlsci/SG0006/rwick/SPAdes-3.9.1-Linux/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/unicycler_v0.2.0:$PATH"
-export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
+export PATH="/vlsci/SG0006/rwick/quast-4.4-barcoo:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
 COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/unicycler_old_normal"

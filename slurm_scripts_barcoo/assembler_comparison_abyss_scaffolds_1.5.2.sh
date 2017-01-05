@@ -9,8 +9,8 @@
 
 module load python-gcc/3.5.1
 
-export PATH="/vlsci/SG0006/rwick/abyss-1.5.2/bin:$PATH"
-export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
+export PATH="/vlsci/SG0006/rwick/abyss-1.5.2-barcoo/bin:$PATH"
+export PATH="/vlsci/SG0006/rwick/quast-4.4-barcoo:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
 COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/abyss_64_scaffolds"

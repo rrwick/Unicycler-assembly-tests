@@ -10,7 +10,7 @@
 
 
 # Short read assembly commands
-velveth output 64 -shortPaired -fmtAuto -separate SHORT_READS_1 SHORT_READS_2
+velveth output 63 -shortPaired -fmtAuto -separate SHORT_READS_1 SHORT_READS_2
 velvetg output/ -exp_cov auto
 
 # Final assembly files
