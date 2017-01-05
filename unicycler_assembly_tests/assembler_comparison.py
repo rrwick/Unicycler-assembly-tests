@@ -234,6 +234,7 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         longest_ref = 0
 
     result.results['Assembler'] = commands.get_assembler_name()
+    result.results['Assembler setting/output'] = commands.get_assembler_setting()
     result.results['Assembler version'] = commands.get_assembler_version()
 
     if read_set.get_set_type() == 'short-only':
@@ -252,8 +253,11 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     else:
         seqs = load_fasta(final_fasta)
         length = sum(len(x[1]) for x in seqs)
-        failed = (length == 0)
-        print(red('assembly failed: ' + final_fasta + ' is empty'))
+        if length == 0:
+            failed = True
+            print(red('assembly failed: ' + final_fasta + ' is empty'))
+        else:
+            failed = False
 
     if failed:
         result.results['Assembly result'] = 'fail'
@@ -290,10 +294,10 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
         print('OUTPUT ->', assembly_stdout_filename)
 
         result.results['Assembly time (seconds)'] = '%.1f' % assembly_time
-        result.results['Assembly FASTA'] = copied_fasta
+        result.results['Assembly FASTA'] = copied_fasta.split('/')[-1]
 
         if copied_graph:
-            result.results['Assembly graph'] = copied_graph
+            result.results['Assembly graph'] = copied_graph.split('/')[-1]
             graph = unicycler.assembly_graph.AssemblyGraph(copied_graph, 0)
             dead_ends = graph.total_dead_end_count()
             result.results['Dead ends'] = dead_ends
@@ -356,9 +360,12 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
 
 
 def get_copied_fasta_name(read_set, commands, out_dir):
-    copied_fasta_name = (read_set.set_name + '__' + commands.command_filename + '_' +
-                         commands.get_assembler_version() +
-                         '.fasta')
+
+    copied_fasta_name = read_set.set_name + '__' + commands.get_assembler_name()
+    setting = commands.get_assembler_setting()
+    if setting:
+        copied_fasta_name += '_' + setting
+    copied_fasta_name += '_' + commands.get_assembler_version() + '.fasta'
     copied_fasta = os.path.join(out_dir, copied_fasta_name)
     return copied_fasta_name, copied_fasta
 
@@ -557,10 +564,6 @@ class Commands(object):
         self.final_assembly_graph = None
         self.command_filename = command_filename.split('/')[-1]
 
-        # Remove 'old' parts of the filename - they'll just clutter it up.
-        self.command_filename = '_'.join([x for x in self.command_filename.split('_')
-                                          if 'old' not in x])
-
         final_assembly_files = []
         mode = None
         with open(command_filename, 'rt') as command_file:
@@ -653,6 +656,31 @@ class Commands(object):
             return 'Canu'
         else:
             return ''
+
+    def get_assembler_setting(self):
+        """
+        Returns contigs/scaffolds for SPAdes and ABySS, and conservative/normal/bold for Unicycler.
+        """
+        assembler_name = self.get_assembler_name()
+        if assembler_name == 'Unicycler':
+            all_command_parts = []
+            for line in self.short_read_assembly_commands:
+                all_command_parts += line.split(' ')
+            for line in self.hybrid_assembly_commands:
+                all_command_parts += line.split(' ')
+            all_command_str = ' '.join(all_command_parts)
+            if 'mode bold' in all_command_str:
+                return 'bold'
+            elif 'mode conservative' in all_command_str:
+                return 'conservative'
+            else:
+                return 'normal'
+        elif assembler_name == 'SPAdes' or assembler_name == 'ABySS':
+            if 'contigs' in self.final_assembly_fasta:
+                return 'contigs'
+            elif 'scaffolds' in self.final_assembly_fasta:
+                return 'scaffolds'
+        return ''
 
     def get_assembler_program(self):
         all_command_parts = []
@@ -761,6 +789,7 @@ class TestResult(object):
         self.results['Reference sequence circularity'] = ''
         self.results['Reference GC (%)'] = ''
         self.results['Assembler'] = ''
+        self.results['Assembler setting/output'] = ''
         self.results['Assembler version'] = ''
         self.results['Assembly command(s)'] = ''
         self.results['Assembly kmer size'] = ''
