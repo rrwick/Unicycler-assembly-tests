@@ -34,7 +34,6 @@ def main():
 
     commands = Commands(args.command_file)
     assembly_dir = os.path.join(args.out_dir, 'ASSEMBLY_TEMP_' + str(os.getpid()))
-    print('\nAssembly temp directory: ' + assembly_dir + '\n')
     create_results_table(args.out_dir)
 
     # Remove read sets this assembler can't handle. E.g. if it's a hybrid read set and a short
@@ -53,13 +52,13 @@ def main():
         for read_set in read_sets:
             read_set.find_reference(args.ref_dir)
 
-    print()
+    print('\n')
     print(bold_yellow_underline('Read sets to assemble'))
     if not read_sets:
-        print('  None')
+        print('None')
     for read_set in read_sets:
-        print('  ' + str(read_set))
-    print('', flush=True)
+        print(str(read_set))
+    print('\nAssembly temp directory: ' + assembly_dir + '\n', flush=True)
 
     for read_set in read_sets:
         print()
@@ -249,14 +248,15 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     final_fasta = os.path.join(assembly_dir, commands.final_assembly_fasta)
     if not os.path.isfile(final_fasta):
         failed = True
+        print(red('assembly failed: ' + final_fasta + ' does not exist'))
     else:
         seqs = load_fasta(final_fasta)
         length = sum(len(x[1]) for x in seqs)
         failed = (length == 0)
+        print(red('assembly failed: ' + final_fasta + ' is empty'))
 
     if failed:
         result.results['Assembly result'] = 'fail'
-        print(red('assembly failed'))
     else:
         result.results['Assembly result'] = 'success'
         print(green('assembly succeeded'))
