@@ -34,6 +34,7 @@ def main():
 
     commands = Commands(args.command_file)
     assembly_dir = os.path.join(args.out_dir, 'ASSEMBLY_TEMP_' + str(os.getpid()))
+    print('Assembly temp directory: ' + assembly_dir + '\n\n')
     create_results_table(args.out_dir)
 
     # Remove read sets this assembler can't handle. E.g. if it's a hybrid read set and a short
@@ -132,7 +133,7 @@ def group_real_reads(read_dir):
     for read_filename in read_filenames:
         set_name = get_set_name_from_real_read_filename(read_filename)
         if set_name not in read_sets:
-            read_sets[set_name] = ReadSet(set_name)
+            read_sets[set_name] = ReadSet(set_name, fake=False)
         read_full_filename = os.path.join(read_dir, read_filename)
         read_sets[set_name].add_read(read_full_filename)
 
@@ -238,6 +239,11 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     result = TestResult()
     result.results['Read set name'] = read_set.set_name
     result.results['Read set type'] = read_set.get_set_type()
+
+    result.results['Real or fake reads'] = read_set.real_or_fake()
+    result.results['Fake Illumina read quality'] = read_set.fake_illumina_quality()
+    result.results['Fake long read quality'] = read_set.fake_long_quality()
+
     result.results['Read files'] = read_set.get_read_list_str()
 
     if read_set.reference:
@@ -339,7 +345,7 @@ def get_copied_fasta_name(read_set, commands, out_dir):
 
 
 def run_quast(fasta, read_set, out_dir, result):
-    quast_dir = os.path.join(out_dir, 'quast_temp_' + str(os.getpid()))
+    quast_dir = os.path.join(out_dir, 'QUAST_TEMP_' + str(os.getpid()))
 
     quast_command = ['quast.py', fasta]
     if read_set.reference:
@@ -381,12 +387,13 @@ def bold(text):
 
 
 class ReadSet(object):
-    def __init__(self, set_name):
+    def __init__(self, set_name, fake=False):
         self.set_name = set_name
         self.short_reads_1 = None
         self.short_reads_2 = None
         self.long_reads = None
         self.reference = None
+        self.fake = fake
 
     def __repr__(self):
         return self.set_name + ' (' + self.get_set_type() + '): ' + self.get_read_list_str() + \
@@ -426,6 +433,22 @@ class ReadSet(object):
     def get_reference_name(self):
         return 'None' if not self.reference else self.reference.split('/')[-1]
 
+    def real_or_fake(self):
+        if self.fake:
+            return 'fake'
+        else:
+            return 'real'
+
+    def fake_illumina_quality(self):
+        if not self.fake:
+            return ''
+        return self.short_reads_1.split('_illumina')[0].split('_')[-1]
+
+    def fake_long_quality(self):
+        if not self.fake or not self.long_reads:
+            return ''
+        return self.long_reads.split('_long')[0].split('_')[-1]
+
 
 class FakeReadSet(object):
     def __init__(self, set_name):
@@ -463,7 +486,7 @@ class FakeReadSet(object):
     def get_read_sets(self):
         read_sets = []
         for short_qual in ['bad', 'medium', 'good']:
-            short_read_set = ReadSet(self.set_name + '__' + short_qual + '_short')
+            short_read_set = ReadSet(self.set_name + '__' + short_qual + '_short', fake=True)
             if short_qual == 'bad':
                 short_read_set.add_read(self.bad_short_reads_1)
                 short_read_set.add_read(self.bad_short_reads_2)
@@ -688,6 +711,9 @@ class TestResult(object):
         self.results = OrderedDict()
         self.results['Read set name'] = ''
         self.results['Read set type'] = ''
+        self.results['Real or fake reads'] = ''
+        self.results['Fake Illumina read quality'] = ''
+        self.results['Fake long read quality'] = ''
         self.results['Read files'] = ''
         self.results['Reference name'] = ''
         self.results['Reference total length'] = ''
