@@ -194,8 +194,16 @@ def make_fake_long_reads(reference, read_filename, depth, args):
             current_depth = current_bases / len(ref_seq)
         print('\t' + str(current_depth), flush=True)
 
+    long_reads = [x for x in long_reads if len(x[0]) > 0]
     random.shuffle(long_reads)
-    with gzip.open(read_filename, 'wt') as reads:
+
+    gzip_after = read_filename.endswith('.gz')
+    if gzip_after:
+        out_file = read_filename.replace('.gz', '')
+    else:
+        out_file = read_filename
+
+    with open(out_file, 'wt') as reads:
         for i, read in enumerate(long_reads):
             read_name = '@long_read_' + str(i+1)
             reads.write(read_name)
@@ -204,6 +212,11 @@ def make_fake_long_reads(reference, read_filename, depth, args):
             reads.write('\n+\n')
             reads.write(read[1])
             reads.write('\n')
+
+    if gzip_after:
+        process = subprocess.Popen(['gzip', out_file], stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        _, _ = process.communicate()
 
 
 def run_pbsim(input_fasta, read_length, read_id, args, ref_len):
