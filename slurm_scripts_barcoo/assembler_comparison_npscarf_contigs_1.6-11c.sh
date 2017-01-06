@@ -1,19 +1,22 @@
 #!/bin/bash
-#SBATCH -p sysgen
+#SBATCH -p main
 #SBATCH --nodes=1
-#SBATCH --job-name="SPAdes contigs 3.1.1 assembler comparison"
+#SBATCH --job-name="npScarf v1.6-11c assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
-#SBATCH --time=10-0:0:00
+#SBATCH --time=1-0:0:00
 
-module load Python/3.5.2-vlsci_intel-2015.08.25
+module load python-gcc/3.5.1
+module load bwa-intel/0.7.12
+module load java/1.8.0_101
 
-export PATH="/vlsci/SG0006/rwick/SPAdes-3.1.1-Linux/bin:$PATH"
-export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
+export PATH="/vlsci/SG0006/rwick/japsa_v1.6-11c/bin:$PATH"
+export PATH="/vlsci/SG0006/rwick/SPAdes-3.9.1-Linux/bin:$PATH"
+export PATH="/vlsci/SG0006/rwick/quast-4.4-barcoo:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/spades2_contigs"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/npscarf3_from_contigs"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
 OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"
