@@ -1,12 +1,121 @@
 # Unicycler assembly tests
 
-This repository contains tools for evaluating the performance of bacterial genome assemblers.
+This repository contains tools for evaluating the performance of bacterial genome assemblers and resulting data. I made these to test my hybrid assembler [Unicycler](https://github.com/rrwick/Unicycler), both to compare it against other assemblers and to assess its performance as I further develop it.
+
+The raw table of assembly data is available in `results.tsv`.
+
+This repo is still a work in progress! Check back later for more results!
 
 
+# Table of contents
+
+* [Assembly of synthetic short reads](#assembly-of-synthetic-short-reads)
+     * [Averages over all short read sets](#averages-over-all-short-read-sets)
+     * [Averages over bad short read sets](#averages-over-bad-short-read-sets)
+     * [Averages over medium short read sets](#averages-over-medium-short-read-sets)
+     * [Averages over good short read sets](#averages-over-good-short-read-sets)
+     * [SPAdes performance by version](#spades-performance-by-version)
+     * [ABySS performance by version](#abyss-performance-by-version)
+     * [Unicycler performance by version](#unicycler-performance-by-version)
+* [Assembly of synthetic hybrid read sets](#assembly-of-synthetic-hybrid-read-sets)
+     * [Averages over all hybrid read sets](#averages-over-all-hybrid-read-sets)
+     * [Averages over bad short read sets](#averages-over-bad-short-read-sets-1)
+     * [Averages over medium short read sets](#averages-over-medium-short-read-sets-1)
+     * [Averages over good short read sets](#averages-over-good-short-read-sets-1)
+     * [Averages over bad long read sets](#averages-over-bad-long-read-sets)
+     * [Averages over medium long read sets](#averages-over-medium-long-read-sets)
+     * [Averages over good long read sets](#averages-over-good-long-read-sets)
+     * [SPAdes performance by version](#spades-performance-by-version-1)
+     * [npScarf performance by version](#npscarf-performance-by-version)
+     * [Unicycler performance by version](#unicycler-performance-by-version-1)
+* [Tools](#tools)
+     * [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads)
+     * [Generating synthetic long reads](#generating-synthetic-long-reads)
+     * [Running test assemblies](#running-test-assemblies)
+
+
+# Assembly of synthetic short reads
+
+Short reads were generated at three different quality levels: bad, medium and good (see [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads) for more information).
+
+### Averages over all short read sets
+
+Assembler | N50 | NGA50 | Extensive misassemblies | Local misassemblies | Mismatch rate | Small indel rate
+--- | --- | --- | --- | --- | --- | ---
+Velvet v1.2.10 | - | - | - | - | - | -
+SPAdes before RR v3.9.1 | - | - | - | - | - | -
+SPAdes contigs v3.9.1 | - | - | - | - | - | -
+SPAdes scaffolds v3.9.1 | - | - | - | - | - | -
+ABySS contigs v2.0.2 | - | - | - | - | - | -
+ABySS scaffolds v2.0.2 | - | - | - | - | - | -
+Unicycler conservative v0.2 | - | - | - | - | - | -
+Unicycler normal v0.2 | - | - | - | - | - | -
+Unicycler bold v0.2 | - | - | - | - | - | -
+
+
+### Averages over bad short read sets
+
+
+### Averages over medium short read sets
+
+
+### Averages over good short read sets
+
+
+### SPAdes performance by version
+
+
+### ABySS performance by version
+
+
+### Unicycler performance by version
+
+
+# Assembly of synthetic hybrid read sets
+
+The hybrid read sets use the same synthetic Illumina reads as described above (three quality levels). Long reads were also generated at three quality levels (see [Generating synthetic long reads](#generating-synthetic-long-reads) for more information).
+
+All nine combinations of short and long reads sets were assembled: bad/bad, bad/medium, bad/good, medium/bad, medium/medium, medium/good, good/bad, good/medium and good/good.
+
+
+### Averages over all hybrid read sets
+
+
+### Averages over bad short read sets
+
+
+### Averages over medium short read sets
+
+
+### Averages over good short read sets
+
+
+### Averages over bad long read sets
+
+
+### Averages over medium long read sets
+
+
+### Averages over good long read sets
+
+
+### SPAdes performance by version
+
+
+### npScarf performance by version
+
+
+### Unicycler performance by version
+
+
+
+# Tools
+
+These the scripts included in this repo
 
 ### Generating synthetic Illumina reads
 
-The `generate_illumina_reads` script is a wrapper for the [ART](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/) program. It adds two bits of functionality to ART:
+`generate_illumina_reads` is a wrapper for the [ART](https://www.niehs.nih.gov/research/resources/software/biostatistics/art/) program. It adds two bits of functionality to ART:
 * If a sequence has `circular=true` in its FASTA header, this script will run ART at multiple sequence rotations to ensure that the simulated reads seamlessly cover the whole circular sequence.
 * Sequences can have `depth=X` in their FASTA header, where `X` is a number. This script will adjust the number of reads generated from each sequence in the FASTA to preserve the relative depths. This is mainly used for plasmid sequences which should be more represented in the reads than the chromosomal sequence.
 
@@ -19,10 +128,9 @@ The `generate_illumina_reads` script is a wrapper for the [ART](https://www.nieh
 `--good` is equivalent to `--depth 100.0 --platform HS25_150` and will generate 150 bp reads with abundant depth.
 
 
-
 ### Generating synthetic long reads
 
-The `generate_long_reads` script uses PBSIM to generate long reads. It adds the same functionality for circular sequences and differing depths as the `generate_illumina_reads` script. Additionally, it uses a log-normal distribution to choose sequence lengths and a beta distribution to choose sequence identities.
+`generate_long_reads` uses PBSIM to generate long reads. It adds the same functionality for circular sequences and differing depths as the `generate_illumina_reads` script. It uses a log-normal distribution to choose sequence lengths and a beta distribution to choose sequence identities.
 
 ##### Quality presets
 
@@ -39,4 +147,7 @@ The `generate_long_reads` script uses PBSIM to generate long reads. It adds the 
 `--bad_pacbio` is equivalent to `--length 5000 --id_alpha 75 --id_beta 25 --id_max 1.0`
 
 
+### Running test assemblies
+
+`assembler_comparison` is a program which gathers up read sets, assembles them using a text file of assembly commands and runs [QUAST](quast.bioinf.spbau.ru) to assess the results.
 
