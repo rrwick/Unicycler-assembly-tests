@@ -705,7 +705,8 @@ class Commands(object):
         elif assembler_name == 'Velvet':
             return [x for x in all_command_parts if 'velveth' in x][0]
         elif assembler_name == 'npScarf':
-            return [x for x in all_command_parts if 'jsa.np.gapcloser' in x][0]
+            return [x for x in all_command_parts
+                    if 'jsa.np.gapcloser' in x or 'jsa.np.npscarf' in x][0]
         elif assembler_name == 'ABySS':
             return [x for x in all_command_parts if 'abyss' in x][0]
         elif assembler_name == 'Canu':
