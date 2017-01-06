@@ -691,9 +691,9 @@ class Commands(object):
                 return 'before_rr'
         elif assembler_name == 'npScarf':
             if 'spadesDir' in all_command_str:
-                return 'with graph'
+                return 'with_graph'
             else:
-                return 'only contigs'
+                return 'only_contigs'
         return ''
 
     def get_assembler_program(self):
