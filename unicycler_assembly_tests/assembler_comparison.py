@@ -759,7 +759,9 @@ class Commands(object):
             all_out = stdout.decode() + ' ' + stderr.decode()
             return all_out.split('v')[1].split()[0]
         elif assembler_name == 'npScarf':
-            version_command = self.get_assembler_program().replace('jsa.np.gapcloser', 'jsa')
+            version_command = self.get_assembler_program()
+            version_command = version_command.replace('jsa.np.gapcloser', 'jsa')
+            version_command = version_command.replace('jsa.np.npscarf', 'jsa')
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
             stdout, stderr = process.communicate()
