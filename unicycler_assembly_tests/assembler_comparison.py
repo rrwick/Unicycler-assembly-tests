@@ -669,13 +669,13 @@ class Commands(object):
         Returns contigs/scaffolds for SPAdes and ABySS, and conservative/normal/bold for Unicycler.
         """
         assembler_name = self.get_assembler_name()
+        all_command_parts = []
+        for line in self.short_read_assembly_commands:
+            all_command_parts += line.split(' ')
+        for line in self.hybrid_assembly_commands:
+            all_command_parts += line.split(' ')
+        all_command_str = ' '.join(all_command_parts)
         if assembler_name == 'Unicycler':
-            all_command_parts = []
-            for line in self.short_read_assembly_commands:
-                all_command_parts += line.split(' ')
-            for line in self.hybrid_assembly_commands:
-                all_command_parts += line.split(' ')
-            all_command_str = ' '.join(all_command_parts)
             if 'mode bold' in all_command_str:
                 return 'bold'
             elif 'mode conservative' in all_command_str:
@@ -689,6 +689,11 @@ class Commands(object):
                 return 'scaffolds'
             elif 'before_rr' in self.final_assembly_fasta:
                 return 'before_rr'
+        elif assembler_name == 'npScarf':
+            if 'spadesDir' in all_command_str:
+                return 'with graph'
+            else:
+                return 'only contigs'
         return ''
 
     def get_assembler_program(self):
