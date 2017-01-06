@@ -9,7 +9,7 @@
 
 module load Python/3.5.2-vlsci_intel-2015.08.25
 
-export PATH="/vlsci/SG0006/rwick/abyss-1.5.2/bin:$PATH"
+export PATH="/vlsci/SG0006/rwick/abyss-1.5.2-helix/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 

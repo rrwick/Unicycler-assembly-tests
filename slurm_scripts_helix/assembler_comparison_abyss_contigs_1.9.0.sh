@@ -8,8 +8,8 @@
 #SBATCH --time=10-0:0:00
 
 module load Python/3.5.2-vlsci_intel-2015.08.25
+module load ABySS/1.9.0-GCC-4.9.2
 
-export PATH="/vlsci/SG0006/rwick/abyss-1.9.0/bin:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 

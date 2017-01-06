@@ -19,7 +19,7 @@ export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/npscarf2_from_graph"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
-OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"
+OUT_DIR="/scratch/sysgen/rwick/assembly_test_results_2"
 REF_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/reference_sequences"
 
 cd $OUT_DIR
