@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p main
 #SBATCH --nodes=1
-#SBATCH --job-name="npScarf v1.6-11c assembler comparison"
+#SBATCH --job-name="npScarf graph v1.6-11c assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
