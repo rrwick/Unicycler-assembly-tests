@@ -743,8 +743,10 @@ class Commands(object):
             process = subprocess.Popen('which abyss-pe', stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
             stdout, _ = process.communicate()
-            doc_path = os.path.abspath(stdout.decode().strip().replace('bin/abyss-pe',
-                                                                       'doc/abyss-pe.1'))
+            abyss_path = stdout.decode().strip()
+            if 'easybuild/software/ABySS/' in abyss_path:
+                return abyss_path.split('easybuild/software/ABySS/')[1].split('-')[0]
+            doc_path = os.path.abspath(abyss_path.replace('bin/abyss-pe', 'doc/abyss-pe.1'))
             with open(doc_path, 'rt') as doc_file:
                 doc_data = doc_file.read()
             return doc_data.split('abyss-pe (ABySS) ')[1].split()[0].replace('"', '')
