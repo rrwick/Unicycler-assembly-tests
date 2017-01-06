@@ -649,7 +649,7 @@ class Commands(object):
     def get_assembler_name(self):
         commands = ' '.join(self.short_read_assembly_commands) + ' '
         commands += ' '.join(self.hybrid_assembly_commands)
-        if 'jsa.np.gapcloser' in commands:
+        if 'jsa.np.gapcloser' in commands or 'jsa.np.npscarf' in commands:
             return 'npScarf'
         elif 'unicycler' in commands:
             return 'Unicycler'
