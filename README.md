@@ -40,17 +40,17 @@ Short reads were generated at three different quality levels: bad, medium and go
 
 ### Averages over all short read sets
 
-Assembler | N50 | NGA50 | Extensive misassemblies | Local misassemblies | Small error rate
---- | --- | --- | --- | --- | ---
-Velvet (v1.2.10) | - | - | - | - | -
-SPAdes (v3.9.1) before RR | - | - | - | - | -
-SPAdes (v3.9.1) contigs | - | - | - | - | -
-SPAdes (v3.9.1) scaffolds | - | - | - | - | -
-ABySS (v2.0.2) contigs | - | - | - | - | -
-ABySS (v2.0.2) scaffolds | - | - | - | - | -
-Unicycler (v0.2) conservative | - | - | - | - | -
-Unicycler (v0.2) normal | - | - | - | - | -
-Unicycler (v0.2) bold | - | - | - | - | -
+Assembler | N50 | NGA50 | Extensive misassemblies | Local misassemblies | Small error rate | Assembly time
+--- | --- | --- | --- | --- | --- | ---
+Velvet (v1.2.10) | - | - | - | - | - | -
+SPAdes (v3.9.1) before RR | - | - | - | - | - | -
+SPAdes (v3.9.1) contigs | - | - | - | - | - | -
+SPAdes (v3.9.1) scaffolds | - | - | - | - | - | -
+ABySS (v2.0.2) contigs | - | - | - | - | - | -
+ABySS (v2.0.2) scaffolds | - | - | - | - | - | -
+Unicycler (v0.2) conservative | - | - | - | - | - | -
+Unicycler (v0.2) normal | - | - | - | - | - | -
+Unicycler (v0.2) bold | - | - | - | - | - | -
 
 
 ### Averages over bad short read sets
