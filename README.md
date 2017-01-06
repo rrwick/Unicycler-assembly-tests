@@ -9,6 +9,7 @@ This repo is still a work in progress! Check back later for more results!
 
 # Table of contents
 
+* [Metrics](#metrics)
 * [Assembly of synthetic short reads](#assembly-of-synthetic-short-reads)
      * [Averages over all short read sets](#averages-over-all-short-read-sets)
      * [Averages over bad short read sets](#averages-over-bad-short-read-sets)
@@ -34,13 +35,29 @@ This repo is still a work in progress! Check back later for more results!
      * [Running test assemblies](#running-test-assemblies)
 
 
+
+# Metrics
+
+__N50__: 
+
+__NGA50__: 
+
+__Ext. mis.__: 
+
+__Local mis.__: 
+
+__Small error rate__: 
+
+__Assembly time__: 
+
+
 # Assembly of synthetic short reads
 
 Short reads were generated at three different quality levels: bad, medium and good (see [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads) for more information).
 
 ### Averages over all short read sets
 
-Assembler | N50 | NGA50 | Extensive misassemblies | Local misassemblies | Small error rate | Assembly time
+Assembler | N50 | NGA50 | Ext. mis. | Local mis. | Small error rate | Assembly time
 --- | --- | --- | --- | --- | --- | ---
 Velvet (v1.2.10) | - | - | - | - | - | -
 SPAdes (v3.9.1) before RR | - | - | - | - | - | -
