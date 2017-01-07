@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
-#SBATCH --time=1-0:0:00
+#SBATCH --time=7-0:0:00
 
 module load samtools-intel/1.3.1
 module load bowtie2-gcc/2.2.9

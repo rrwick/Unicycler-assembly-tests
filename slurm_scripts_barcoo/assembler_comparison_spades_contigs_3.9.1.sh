@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
-#SBATCH --time=1-0:0:00
+#SBATCH --time=2-0:0:00
 
 module load python-gcc/3.5.1
 

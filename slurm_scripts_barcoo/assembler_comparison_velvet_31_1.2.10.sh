@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH -p main
 #SBATCH --nodes=1
-#SBATCH --job-name="Velvet 1.2.10 assembler comparison"
+#SBATCH --job-name="Velvet 31 1.2.10 assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762
-#SBATCH --time=1-0:0:00
+#SBATCH --time=2-0:0:00
 
 module load python-gcc/3.5.1
 
@@ -13,10 +13,10 @@ export PATH="/vlsci/SG0006/rwick/velvet_1.2.10-barcoo:$PATH"
 export PATH="/vlsci/SG0006/rwick/quast-4.4-barcoo:$PATH"
 export PATH="/scratch/sysgen/rwick/Unicycler-assembly-tests:$PATH"
 
-COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/velvet_63"
+COMMAND_FILE="/scratch/sysgen/rwick/Unicycler-assembly-tests/assembly_commands/velvet_31"
 
 READ_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/synthetic_reads"
-OUT_DIR="/scratch/sysgen/rwick/assembly_test_results"
+OUT_DIR="/scratch/sysgen/rwick/assembly_test_results_3"
 REF_DIR="/scratch/sysgen/rwick/Unicycler-assembly-tests/reference_sequences"
 
 cd $OUT_DIR
