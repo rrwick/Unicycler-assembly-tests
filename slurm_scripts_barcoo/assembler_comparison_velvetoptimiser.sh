@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p main
 #SBATCH --nodes=1
-#SBATCH --job-name="Velvet 63 1.2.10 assembler comparison"
+#SBATCH --job-name="VelvetOptimiser assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32762

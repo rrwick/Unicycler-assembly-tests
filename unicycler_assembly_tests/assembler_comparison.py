@@ -659,6 +659,8 @@ class Commands(object):
             return 'SPAdes'
         elif 'velveth' in commands:
             return 'Velvet'
+        elif 'VelvetOptimiser' in commands:
+            return 'VelvetOptimiser'
         elif commands.startswith('canu'):
             return 'Canu'
         else:
@@ -709,6 +711,8 @@ class Commands(object):
             return [x for x in all_command_parts if 'spades' in x][0]
         elif assembler_name == 'Velvet':
             return [x for x in all_command_parts if 'velveth' in x][0]
+        elif assembler_name == 'VelvetOptimiser':
+            return [x for x in all_command_parts if 'VelvetOptimiser' in x][0]
         elif assembler_name == 'npScarf':
             return [x for x in all_command_parts
                     if 'jsa.np.gapcloser' in x or 'jsa.np.npscarf' in x][0]
@@ -740,6 +744,13 @@ class Commands(object):
             return version
         elif assembler_name == 'Velvet':
             version_command = self.get_assembler_program()
+            process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE, shell=True)
+            stdout, stderr = process.communicate()
+            all_out = stdout.decode() + ' ' + stderr.decode()
+            return all_out.split('Version ')[1].split()[0]
+        elif assembler_name == 'VelvetOptimiser':
+            version_command = self.get_assembler_program() + ' --help'
             process = subprocess.Popen(version_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE, shell=True)
             stdout, stderr = process.communicate()
