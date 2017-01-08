@@ -56,7 +56,8 @@ __Assembly time__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
 
 Short reads were generated at three different quality levels: bad, medium and good (see [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads) for more information).
 
-### Averages over all short read sets
+
+### Bad short read sets
 
 Assembler | N50 | NGA50 | Ext. mis. | Local mis. | Small error rate | Assembly time
 --- | --- | --- | --- | --- | --- | ---
@@ -71,13 +72,10 @@ Unicycler (v0.2) normal | - | - | - | - | - | -
 Unicycler (v0.2) bold | - | - | - | - | - | -
 
 
-### Averages over bad short read sets
+### Medium short read sets
 
 
-### Averages over medium short read sets
-
-
-### Averages over good short read sets
+### Good short read sets
 
 
 ### SPAdes performance by version

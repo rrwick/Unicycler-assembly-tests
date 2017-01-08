@@ -794,6 +794,8 @@ class Commands(object):
             return 'n/a'
         elif assembler_name == 'npScarf':
             return 'auto'
+        elif assembler_name == 'VelvetOptimiser':
+            return 'auto'
         commands = ' '.join(self.short_read_assembly_commands)
         if assembler_name == 'Velvet':
             return commands.split(' ')[2]
