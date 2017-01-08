@@ -1,0 +1,17 @@
+# This text file describes the commands necessary for running an assembler.
+
+# The lines following 'Short read assembly commands' describe the assembly of
+# paired-end short reads. The lines following 'Hybrid assembly commands'
+# describe the assembly of hybrid read sets. The lines following 'Final
+# assembly files' are the filenames of the end product(s) of assembly.
+
+# The commands will be executed with 'SHORT_READS_1', 'SHORT_READS_2' and
+# 'LONG_READS' replaced as appropriate.
+
+
+# Short read assembly commands
+VelvetOptimiser.pl -s 19 -e 101 -f '-shortPaired -fmtAuto -separate SHORT_READS_1 SHORT_READS_2' -t 8 -p assembly
+cp assembly_data_*/contigs.fa .
+
+# Final assembly files
+contigs.fa
