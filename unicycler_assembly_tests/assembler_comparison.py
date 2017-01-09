@@ -197,7 +197,11 @@ def execute_commands(commands, read_set, assembly_dir):
         print(command, flush=True)
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    shell=True)
-        stdout, _ = process.communicate()
+        try:
+            stdout, _ = process.communicate()
+        except OSError:
+            print('', flush=True)
+            return 0.0, 'Failed with OSError'
         print('', flush=True)
         all_stdout += stdout.decode()
     assembly_time = time.time() - start_time
@@ -247,7 +251,10 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
 
     # Check to see that the final FASTA exists and contains sequence.
     final_fasta = os.path.join(assembly_dir, commands.final_assembly_fasta)
-    if not os.path.isfile(final_fasta):
+    if assembly_stdout == 'Failed with OSError':
+        failed = True
+        print(red('assembly failed: with OSError'))
+    elif not os.path.isfile(final_fasta):
         failed = True
         print(red('assembly failed: ' + final_fasta + ' does not exist'))
     else:
@@ -272,6 +279,12 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
     copied_fasta_name, copied_fasta = get_copied_fasta_name(read_set, commands, out_dir)
     assembly_stdout_filename = os.path.join(out_dir,
                                             copied_fasta_name.replace('.fasta', '.out'))
+
+    # If the output file already exists, that implies a previously failed run. If this run also
+    # failed, then quit now to avoid making a duplicate result line.
+    if os.path.isfile(assembly_stdout_filename) and failed:
+        return
+
     with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
         assembly_stdout_file.write(assembly_stdout)
     print('OUTPUT ->', assembly_stdout_filename)
