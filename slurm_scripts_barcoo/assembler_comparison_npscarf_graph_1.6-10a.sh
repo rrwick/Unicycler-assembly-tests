@@ -4,7 +4,7 @@
 #SBATCH --job-name="npScarf graph v1.6-10a assembler comparison"
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=32762
+#SBATCH --mem=65536
 #SBATCH --time=3-0:0:00
 
 module load python-gcc/3.5.1
