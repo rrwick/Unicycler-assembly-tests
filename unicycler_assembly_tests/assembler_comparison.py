@@ -199,9 +199,9 @@ def execute_commands(commands, read_set, assembly_dir):
                                    shell=True)
         try:
             stdout, _ = process.communicate()
-        except OSError:
+        except (OSError, MemoryError):
             print('', flush=True)
-            return 0.0, 'Failed with OSError'
+            return 0.0, 'Failed with OSError/MemoryError'
         print('', flush=True)
         all_stdout += stdout.decode()
     assembly_time = time.time() - start_time
