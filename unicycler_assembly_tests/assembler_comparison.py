@@ -67,7 +67,7 @@ def main():
         # Don't bother if the file already exists. This lets us resume crashed/stopped runs
         # without repeating too much work.
         _, copied_fasta = get_copied_fasta_name(read_set, commands, args.out_dir)
-        if os.path.isfile(copied_fasta):
+        if os.path.isfile(copied_fasta) or os.path.isfile(copied_fasta + '.gz'):
             print('Already done')
             continue
 
