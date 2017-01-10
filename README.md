@@ -9,6 +9,7 @@ This repo is still a work in progress! Check back later for more results!
 
 # Table of contents
 
+* [Programs tested](#metrics)
 * [Metrics](#metrics)
 * [Assembly of synthetic short reads](#assembly-of-synthetic-short-reads)
      * [Averages over all short read sets](#averages-over-all-short-read-sets)
@@ -35,20 +36,36 @@ This repo is still a work in progress! Check back later for more results!
      * [Running test assemblies](#running-test-assemblies)
 
 
+# Programs tested
+
+[Unicycler](https://github.com/rrwick/Unicycler) for both short read and hybrid assemblies. I ran it in each of its three modes: conservative, normal and bold.
+
+[SPAdes](http://cab.spbu.ru/software/spades/) for both short read and hybrid assemblies. Both `contigs.fasta` and `scaffolds.fasta` are analysed. For short read assemblies, I also included `before_rr.fasta` which corresponds to `assembly_graph.fastg`. SPAdes was run with the `--careful` options as suggested in the [SPAdes manual](http://cab.spbu.ru/files/release3.9.1/manual.html#sec3.4) for small genomes.
+
+[npScarf](https://github.com/mdcao/npScarf) for hybrid assemblies.
+
+[ABySS](https://github.com/bcgsc/abyss) for short read assemblies. Both `*-contigs.fa` and `*-scaffolds.fa` are analysed. ABySS needs a k-mer size as a parameter, so I used `k=64` as shown in their example for [assembling a paired-end library](https://github.com/bcgsc/abyss#assembling-a-paired-end-library).
+
+[Velvet](https://www.ebi.ac.uk/~zerbino/velvet/) for short read assemblies. Like ABySS, Velvet needs a k-mer. To match the ABySS assemblies, I used a k-mer of 63 (Velvet k-mers must be odd).
+
+[VelvetOptimiser](https://github.com/tseemann/VelvetOptimiser) for short read assemblies. I used a very wide k-mer sweep, from 19 to 101 (slow but thorough).
+
+For the exact commands, check out the files in the [assembly_commands/](assembly_commands/) directory.
+
 
 # Metrics
 
-__N50__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+I ran [QUAST 4.4](http://quast.bioinf.spbau.ru/) on each assembly, which generates many metrics you can read about in the [QUAST manual](http://quast.bioinf.spbau.ru/manual.html). Below are some quick explanations of the few I chose to focus on here:
 
-__NGA50__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. For these tests, QUAST was run with the `--strict-NA` option which makes it break alignments on both local and extensive misassemblies (the default is to only break on extensive misassemblies).
+__N50__: A well-known metric of contig sizes. Contigs of this size and larger comprise at least half of the assembly. This metric measures only how big the contigs are, not whether they are correct. E.g. it is possible to 'cheat' your way to a large N50 score by aggressively combining sequences which shouldn't be combined.
 
-__Ext. mis.__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+__NGA50__: This is like N50, but instead of being based on contig sizes, it is based on QUAST's alignments of contigs to the reference genome. Since a misassembled contig can have multiple smaller alignments, this metric does penalise for assembly errors. I think of it as like an N50 score where you can't 'cheat'. For these tests, QUAST was run with the `--strict-NA` option which makes it break alignments on both local and extensive misassemblies (the default is to only break on extensive misassemblies).
 
-__Local mis.__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+__Misassemblies__: QUAST categories misassemblies as either local (less than 1 kbp discrepancy) or extensive (more than 1 kbp discrepancy). This metric is a sum of the two. I.e. it is a count of all misassemblies, regardless of their size.
 
-__Small error rate__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+__Small error rate__: QUAST counts both mismatch and indel rates, and this metric is a sum of the two. Indels counted here are small, because if they were too large they would instead be a misassembly.
 
-__Assembly time__: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+__Assembly time__: How many minutes the assembly took to complete. These tests were all run with 8 cores, but the conditions weren't very controlled, so these values won't be too precise.
 
 
 
@@ -59,32 +76,12 @@ Short reads were generated at three different quality levels: bad, medium and go
 
 ### Bad short read sets
 
-Assembler | N50 | NGA50 | Ext. mis. | Local mis. | Small error rate | Assembly time
---- | --- | --- | --- | --- | --- | ---
-Velvet (v1.2.10) | - | - | - | - | - | -
-SPAdes (v3.9.1) before RR | - | - | - | - | - | -
-SPAdes (v3.9.1) contigs | - | - | - | - | - | -
-SPAdes (v3.9.1) scaffolds | - | - | - | - | - | -
-ABySS (v2.0.2) contigs | - | - | - | - | - | -
-ABySS (v2.0.2) scaffolds | - | - | - | - | - | -
-Unicycler (v0.2) conservative | - | - | - | - | - | -
-Unicycler (v0.2) normal | - | - | - | - | - | -
-Unicycler (v0.2) bold | - | - | - | - | - | -
-
 
 ### Medium short read sets
 
 
 ### Good short read sets
 
-
-### SPAdes performance by version
-
-
-### ABySS performance by version
-
-
-### Unicycler performance by version
 
 
 # Assembly of synthetic hybrid read sets
@@ -94,34 +91,35 @@ The hybrid read sets use the same synthetic Illumina reads as described above (t
 All nine combinations of short and long reads sets were assembled: bad/bad, bad/medium, bad/good, medium/bad, medium/medium, medium/good, good/bad, good/medium and good/good.
 
 
-### Averages over all hybrid read sets
+### Bad short, bad long hybrid read sets
 
 
-### Averages over bad short read sets
+### Bad short, medium long hybrid read sets
 
 
-### Averages over medium short read sets
+### Bad short, good long hybrid read sets
 
 
-### Averages over good short read sets
+### Medium short, bad long hybrid read sets
 
 
-### Averages over bad long read sets
+### Medium short, medium long hybrid read sets
 
 
-### Averages over medium long read sets
+### Medium short, good long hybrid read sets
 
 
-### Averages over good long read sets
+### Good short, bad long hybrid read sets
 
 
-### SPAdes performance by version
+### Good short, medium long hybrid read sets
 
 
-### npScarf performance by version
+### Good short, good long hybrid read sets
 
 
-### Unicycler performance by version
+
+# Conclusions
 
 
 

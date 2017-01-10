@@ -4,13 +4,14 @@ library(knitr)
 table_format <- "markdown"
 
 
-filter_results <- function(results, exclude_random_seqs = TRUE, read_set_type = NULL, assembler = NULL, version = NULL, setting = NULL, illumina_qual = NULL, long_qual = NULL) {
+filter_results <- function(results, exclude_random_seqs = TRUE, exclude_bad_illumina = FALSE, read_set_type = NULL, assembler = NULL, version = NULL, setting = NULL, illumina_qual = NULL, long_qual = NULL) {
   if (exclude_random_seqs) {results <- results[!grepl("random_sequences", results$`Reference name`), ]}
   if (!is.null(read_set_type)) {results <- results[results$`Read set type` == read_set_type,]}
   if (!is.null(assembler)) {results <- results[results$Assembler == assembler,]}
   if (!is.null(version)) {results <- results[results$`Assembler version` == version,]}
   if (!is.null(setting)) {results <- results[results$`Assembler setting/output` == setting,]}
   if (!is.null(illumina_qual)) {results <- results[results$`Fake Illumina read quality` == illumina_qual,]}
+  if (exclude_bad_illumina) {results <- results[results$`Fake Illumina read quality` != "bad",]}
   if (!is.null(long_qual)) {results <- results[results$`Fake long read quality` == long_qual,]}
   return(results)
 }
@@ -110,16 +111,15 @@ short_read_table <- function(results, illumina_qual) {
   kable(short_read_results, format = table_format)
 }
 
-hybrid_table <- function(results, illumina_qual = NULL, long_qual = NULL) {
+hybrid_table <- function(results, illumina_qual = NULL, long_qual = NULL, exclude_bad_illumina = FALSE) {
   result_groups = list()
-  result_groups[[1]] <- filter_results(results, assembler = "SPAdes", version = "3.9.1", setting = "contigs", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
-  print(dim(result_groups[[1]]))
-  result_groups[[2]] <- filter_results(results, assembler = "SPAdes", version = "3.9.1", setting = "scaffolds", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
-  result_groups[[3]] <- filter_results(results, assembler = "npScarf", version = "1.6-10a", setting = "only_contigs", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
-  result_groups[[4]] <- filter_results(results, assembler = "npScarf", version = "1.6-10a", setting = "with_graph", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
-  result_groups[[5]] <- filter_results(results, assembler = "Unicycler", version = "0.2.0", setting = "conservative", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
-  result_groups[[6]] <- filter_results(results, assembler = "Unicycler", version = "0.2.0", setting = "normal", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
-  result_groups[[7]] <- filter_results(results, assembler = "Unicycler", version = "0.2.0", setting = "bold", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid")
+  result_groups[[1]] <- filter_results(results, assembler = "SPAdes", version = "3.9.1", setting = "contigs", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
+  result_groups[[2]] <- filter_results(results, assembler = "SPAdes", version = "3.9.1", setting = "scaffolds", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
+  result_groups[[3]] <- filter_results(results, assembler = "npScarf", version = "1.6-10a", setting = "only_contigs", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
+  result_groups[[4]] <- filter_results(results, assembler = "npScarf", version = "1.6-10a", setting = "with_graph", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
+  result_groups[[5]] <- filter_results(results, assembler = "Unicycler", version = "0.2.0", setting = "conservative", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
+  result_groups[[6]] <- filter_results(results, assembler = "Unicycler", version = "0.2.0", setting = "normal", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
+  result_groups[[7]] <- filter_results(results, assembler = "Unicycler", version = "0.2.0", setting = "bold", illumina_qual = illumina_qual, long_qual = long_qual, exclude_random_seqs = TRUE, read_set_type = "hybrid", exclude_bad_illumina = exclude_bad_illumina)
   
   assembler_names <- get_assembler_names(result_groups)
   assembler_versions <- get_assembler_versions(result_groups)
@@ -148,6 +148,17 @@ short_read_table(results, "good")
 hybrid_table(results, illumina_qual = "bad")
 hybrid_table(results, illumina_qual = "medium")
 hybrid_table(results, illumina_qual = "good")
-hybrid_table(results, long_qual = "bad")
-hybrid_table(results, long_qual = "medium")
-hybrid_table(results, long_qual = "good")
+hybrid_table(results, long_qual = "bad", exclude_bad_illumina = TRUE)
+hybrid_table(results, long_qual = "medium", exclude_bad_illumina = TRUE)
+hybrid_table(results, long_qual = "good", exclude_bad_illumina = TRUE)
+
+
+hybrid_table(results, illumina_qual = "bad", long_qual = "bad")
+hybrid_table(results, illumina_qual = "bad", long_qual = "medium")
+hybrid_table(results, illumina_qual = "bad", long_qual = "good")
+hybrid_table(results, illumina_qual = "medium", long_qual = "bad")
+hybrid_table(results, illumina_qual = "medium", long_qual = "medium")
+hybrid_table(results, illumina_qual = "medium", long_qual = "good")
+hybrid_table(results, illumina_qual = "good", long_qual = "bad")
+hybrid_table(results, illumina_qual = "good", long_qual = "medium")
+hybrid_table(results, illumina_qual = "good", long_qual = "good")

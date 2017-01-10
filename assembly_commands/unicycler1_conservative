@@ -1,13 +1,4 @@
-# This text file describes the commands necessary for running an assembler.
-
-# The lines following 'Short read assembly commands' describe the assembly of
-# paired-end short reads. The lines following 'Hybrid assembly commands'
-# describe the assembly of hybrid read sets. The lines following 'Final
-# assembly files' are the filenames of the end product(s) of assembly.
-
-# The commands will be executed with 'SHORT_READS_1', 'SHORT_READS_2' and
-# 'LONG_READS' replaced as appropriate.
-
+# Applies to Unicycler v0.1 and v0.2, before the --no_long option was removed.
 
 # Short read assembly commands
 unicycler-runner.py -1 SHORT_READS_1 -2 SHORT_READS_2 --no_long -o output --mode conservative --threads 8
