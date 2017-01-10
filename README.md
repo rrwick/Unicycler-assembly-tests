@@ -38,17 +38,12 @@ This repo is still a work in progress! Check back later for more results!
 
 # Programs tested
 
-[Unicycler](https://github.com/rrwick/Unicycler) for both short read and hybrid assemblies. I ran it in each of its three modes: conservative, normal and bold.
-
-[SPAdes](http://cab.spbu.ru/software/spades/) for both short read and hybrid assemblies. Both `contigs.fasta` and `scaffolds.fasta` are analysed. For short read assemblies, I also included `before_rr.fasta` which corresponds to `assembly_graph.fastg`. SPAdes was run with the `--careful` options as suggested in the [SPAdes manual](http://cab.spbu.ru/files/release3.9.1/manual.html#sec3.4) for small genomes.
-
-[npScarf](https://github.com/mdcao/npScarf) for hybrid assemblies.
-
-[ABySS](https://github.com/bcgsc/abyss) for short read assemblies. Both `*-contigs.fa` and `*-scaffolds.fa` are analysed. ABySS needs a k-mer size as a parameter, so I used `k=64` as shown in their example for [assembling a paired-end library](https://github.com/bcgsc/abyss#assembling-a-paired-end-library).
-
-[Velvet](https://www.ebi.ac.uk/~zerbino/velvet/) for short read assemblies. Like ABySS, Velvet needs a k-mer. To match the ABySS assemblies, I used a k-mer of 63 (Velvet k-mers must be odd).
-
-[VelvetOptimiser](https://github.com/tseemann/VelvetOptimiser) for short read assemblies. I used a very wide k-mer sweep, from 19 to 101 (slow but thorough).
+* [Unicycler](https://github.com/rrwick/Unicycler) for both short read and hybrid assemblies. I ran it in each of its three modes: conservative, normal and bold.
+* [SPAdes](http://cab.spbu.ru/software/spades/) for both short read and hybrid assemblies. Both `contigs.fasta` and `scaffolds.fasta` are analysed. For short read assemblies, I also included `before_rr.fasta` which corresponds to `assembly_graph.fastg`. SPAdes was run with the `--careful` options as suggested in the [SPAdes manual](http://cab.spbu.ru/files/release3.9.1/manual.html#sec3.4) for small genomes.
+* [npScarf](https://github.com/mdcao/npScarf) for hybrid assemblies.
+* [ABySS](https://github.com/bcgsc/abyss) for short read assemblies. Both `*-contigs.fa` and `*-scaffolds.fa` are analysed. ABySS needs a k-mer size as a parameter, so I used `k=64` as shown in their example for [assembling a paired-end library](https://github.com/bcgsc/abyss#assembling-a-paired-end-library).
+* [Velvet](https://www.ebi.ac.uk/~zerbino/velvet/) for short read assemblies. Like ABySS, Velvet needs a k-mer. To match the ABySS assemblies, I used a k-mer of 63 (Velvet k-mers must be odd).
+* [VelvetOptimiser](https://github.com/tseemann/VelvetOptimiser) for short read assemblies. I used a very wide k-mer sweep, from 19 to 101 (slow but thorough).
 
 For the exact commands, check out the files in the [assembly_commands/](assembly_commands/) directory.
 
@@ -57,15 +52,11 @@ For the exact commands, check out the files in the [assembly_commands/](assembly
 
 I ran [QUAST 4.4](http://quast.bioinf.spbau.ru/) on each assembly, which generates many metrics you can read about in the [QUAST manual](http://quast.bioinf.spbau.ru/manual.html). Below are some quick explanations of the few I chose to focus on here:
 
-__N50__: A well-known metric of contig sizes. Contigs of this size and larger comprise at least half of the assembly. This metric measures only how big the contigs are, not whether they are correct. E.g. it is possible to 'cheat' your way to a large N50 score by aggressively combining sequences which shouldn't be combined.
-
-__NGA50__: This is like N50, but instead of being based on contig sizes, it is based on QUAST's alignments of contigs to the reference genome. Since a misassembled contig can have multiple smaller alignments, this metric does penalise for assembly errors. I think of it as like an N50 score where you can't 'cheat'. For these tests, QUAST was run with the `--strict-NA` option which makes it break alignments on both local and extensive misassemblies (the default is to only break on extensive misassemblies).
-
-__Misassemblies__: QUAST categories misassemblies as either local (less than 1 kbp discrepancy) or extensive (more than 1 kbp discrepancy). This metric is a sum of the two. I.e. it is a count of all misassemblies, regardless of their size.
-
-__Small error rate__: QUAST counts both mismatch and indel rates, and this metric is a sum of the two. Indels counted here are small, because if they were too large they would instead be a misassembly.
-
-__Assembly time__: How many minutes the assembly took to complete. These tests were all run with 8 cores, but the conditions weren't very controlled, so these values won't be too precise.
+* __N50__: A well-known metric of contig sizes. Contigs of this size and larger comprise at least half of the assembly. This metric measures only how big the contigs are, not whether they are correct. E.g. it is possible to 'cheat' your way to a large N50 score by aggressively combining sequences which shouldn't be combined.
+* __NGA50__: This is like N50, but instead of being based on contig sizes, it is based on QUAST's alignments of contigs to the reference genome. Since a misassembled contig can have multiple smaller alignments, this metric does penalise for assembly errors. I think of it as like an N50 score where you can't 'cheat'. For these tests, QUAST was run with the `--strict-NA` option which makes it break alignments on both local and extensive misassemblies (the default is to only break on extensive misassemblies).
+* __Misassemblies__: QUAST categories misassemblies as either local (less than 1 kbp discrepancy) or extensive (more than 1 kbp discrepancy). This metric is a sum of the two. I.e. it is a count of all misassemblies, regardless of their size.
+* __Small error rate__: QUAST counts both mismatch and indel rates, and this metric is a sum of the two. Indels counted here are small, because if they were too large they would instead be a misassembly.
+* __Assembly time__: How many minutes the assembly took to complete. These tests were all run with 8 cores, but the conditions weren't very controlled, so these values won't be too precise.
 
 
 
