@@ -188,7 +188,10 @@ def execute_commands(commands, read_set, assembly_dir):
     else:
         set_commands = commands.get_hybrid_assembly_commands(read_set)
 
-    starting_dir = os.getcwd()
+    try:
+        starting_dir = os.getcwd()
+    except FileNotFoundError:
+        starting_dir = assembly_dir
     os.chdir(assembly_dir)
 
     start_time = time.time()
@@ -201,6 +204,7 @@ def execute_commands(commands, read_set, assembly_dir):
             stdout, _ = process.communicate()
         except (OSError, MemoryError):
             print('', flush=True)
+            os.chdir(starting_dir)
             return 0.0, 'Failed with OSError/MemoryError'
         print('', flush=True)
         all_stdout += stdout.decode()
