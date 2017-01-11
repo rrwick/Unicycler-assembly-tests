@@ -40,7 +40,7 @@ This repo is still a work in progress! Check back later for more results!
 
 * [Unicycler](https://github.com/rrwick/Unicycler) for both short read and hybrid assemblies. I ran it in each of its three modes: conservative, normal and bold.
 * [SPAdes](http://cab.spbu.ru/software/spades/) for both short read and hybrid assemblies. Both `contigs.fasta` and `scaffolds.fasta` are analysed. For short read assemblies, I also included `before_rr.fasta` which corresponds to `assembly_graph.fastg`. SPAdes was run with the `--careful` options as suggested in the [SPAdes manual](http://cab.spbu.ru/files/release3.9.1/manual.html#sec3.4) for small genomes.
-* [npScarf](https://github.com/mdcao/npScarf) for hybrid assemblies.
+* [npScarf](https://github.com/mdcao/npScarf) for hybrid assemblies. I used SPAdes to make the input contigs, and npScarf can be run using just the contigs or with with SPAdes assembly graph as additional info. Both configurations (with and without the SPAdes assembly graph) are analysed.
 * [ABySS](https://github.com/bcgsc/abyss) for short read assemblies. Both `*-contigs.fa` and `*-scaffolds.fa` are analysed. ABySS needs a k-mer size as a parameter, so I used `k=64` as shown in their example for [assembling a paired-end library](https://github.com/bcgsc/abyss#assembling-a-paired-end-library).
 * [Velvet](https://www.ebi.ac.uk/~zerbino/velvet/) for short read assemblies. Like ABySS, Velvet needs a k-mer. To match the ABySS assemblies, I used a k-mer of 63 (Velvet k-mers must be odd).
 * [VelvetOptimiser](https://github.com/tseemann/VelvetOptimiser) for short read assemblies. I used a very wide k-mer sweep, from 19 to 101 (slow but thorough).

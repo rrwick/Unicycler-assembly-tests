@@ -282,7 +282,8 @@ def evaluate_results(commands, read_set, assembly_dir, assembly_time, assembly_s
 
     # If the output file already exists, that implies a previously failed run. If this run also
     # failed, then quit now to avoid making a duplicate result line.
-    if os.path.isfile(assembly_stdout_filename) and failed:
+    if (os.path.isfile(assembly_stdout_filename) or
+            os.path.isfile(assembly_stdout_filename + '.gz')) and failed:
         return
 
     with open(assembly_stdout_filename, 'wt') as assembly_stdout_file:
