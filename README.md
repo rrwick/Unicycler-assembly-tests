@@ -1,8 +1,8 @@
 # Unicycler assembly tests
 
-This repository contains tools for evaluating the performance of bacterial genome assemblers and resulting data. I made these to test my hybrid assembler [Unicycler](https://github.com/rrwick/Unicycler), both to compare it against other assemblers and to assess its performance as I further develop it.
+This repository contains tools for evaluating the performance of bacterial genome assemblers and resulting data. I made these to test [Unicycler](https://github.com/rrwick/Unicycler) - both to compare it against other assemblers and to assess its performance as I develop it.
 
-The raw table of all data is available in [assembly_data.tsv].
+The raw table of all data is available in [assembly_data.tsv] and some interesting summary tables are below.
 
 This repo is still a work in progress! Check back later for more results!
 
@@ -67,12 +67,12 @@ To give an accurate comparison between assemblers, the tables below show the ave
 
 # Reference genomes
 
-Three references are artificial genomes:
-* __random sequences, no repeats__: a 4 Mb genome, 100 kb plasmid and 10 kb plasmid, all made of random bases. This is the easiest 'genome' to assemble.
+Three references are artificial bacterial genomes:
+* __random sequences, no repeats__: a 4 Mb chromosome, 100 kb plasmid and 10 kb plasmid, all made of random bases. With no repeats of any significant length, this is the easiest genome to assemble.
 * __random sequences, some repeats__: The same three replicon sizes but with a moderate amount of repeats added.
 * __random sequences, many repeats__: The same three replicon sizes but with a large number of repeats added.
 
-Twelve references are real genomes available from [NCBI](https://www.ncbi.nlm.nih.gov/genome/):
+Twelve references are assemblies available from [NCBI](https://www.ncbi.nlm.nih.gov/):
 * [_Acinetobacter baumannii_ A1](https://www.ncbi.nlm.nih.gov/assembly/248731/): has a large, repetitive biofilm-associated protein gene that's difficult to assemble
 * [_Acinetobacter baumannii_ AB30](https://www.ncbi.nlm.nih.gov/assembly/206901/): has a large, repetitive biofilm-associated protein gene that's difficult to assemble
 * [_Escherichia coli_ K-12 MG1655](https://www.ncbi.nlm.nih.gov/assembly/79781)
@@ -90,13 +90,13 @@ Twelve references are real genomes available from [NCBI](https://www.ncbi.nlm.ni
 
 # Synthetic reads
 
-The read files are too large to include in this GitHub repo, but you can download them here: [https://cloudstor.aarnet.edu.au/plus/index.php/s/dzRCaxLjpGpfKYW](https://cloudstor.aarnet.edu.au/plus/index.php/s/dzRCaxLjpGpfKYW)
+The read files are too large for this GitHub repo, but you can download them here: [https://cloudstor.aarnet.edu.au/plus/index.php/s/dzRCaxLjpGpfKYW](https://cloudstor.aarnet.edu.au/plus/index.php/s/dzRCaxLjpGpfKYW)
 
 
 
 # Assembly of synthetic short reads
 
-Short reads were generated at three different quality levels: bad, medium and good (see [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads) for more information).
+Short reads were synthesised at three different qualities: bad, medium and good (see [synthetic Illumina read quality presets](#quality-presets)).
 
 
 ### Bad short reads
@@ -147,7 +147,7 @@ Short reads were generated at three different quality levels: bad, medium and go
 
 # Assembly of synthetic hybrid read sets
 
-The hybrid read sets use the same synthetic Illumina reads as described above (three quality levels). Long reads were also generated at three quality levels (see [Generating synthetic long reads](#generating-synthetic-long-reads) for more information).
+The hybrid read sets use the same synthetic Illumina reads as described above (three quality levels). Long reads were also synthesised at three qualites (see [synthetic long read quality presets](#quality-presets-1)).
 
 All nine combinations of short and long reads sets were assembled: bad/bad, bad/medium, bad/good, medium/bad, medium/medium, medium/good, good/bad, good/medium and good/good.
 
@@ -306,7 +306,7 @@ These the scripts included in this repo that I used to generate the reads and ru
 
 ##### Quality presets
 
-Nanopore presets have a wider distribution of read identity. PacBio presets have a narrow identity distribution.
+Nanopore presets have a wider distribution of read identity; PacBio presets have a narrow identity distribution. For the tests above I used the Nanopore presets.
 
 * `--bad_nanopore` is equivalent to `--depth 8.0 --length 5000 --id_alpha 11 --id_beta 4 --id_max 0.9`
 * `--medium_nanopore` is equivalent to `--depth 16.0 --length 10000 --id_alpha 12 --id_beta 3 --id_max 0.95`
