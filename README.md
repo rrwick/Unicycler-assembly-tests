@@ -2,38 +2,38 @@
 
 This repository contains tools for evaluating the performance of bacterial genome assemblers and resulting data. I made these to test my hybrid assembler [Unicycler](https://github.com/rrwick/Unicycler), both to compare it against other assemblers and to assess its performance as I further develop it.
 
-The raw table of assembly data is available in `results.tsv`.
+The raw table of all data is available in [assembly_data.tsv].
 
 This repo is still a work in progress! Check back later for more results!
 
 
+
 # Table of contents
 
-* [Programs tested](#metrics)
+* [Programs tested](#programs-tested)
 * [Metrics](#metrics)
+* [Reference genomes](#reference-genomes)
+* [Synthetic reads](#synthetic-reads)
 * [Assembly of synthetic short reads](#assembly-of-synthetic-short-reads)
-     * [Averages over all short read sets](#averages-over-all-short-read-sets)
-     * [Averages over bad short read sets](#averages-over-bad-short-read-sets)
-     * [Averages over medium short read sets](#averages-over-medium-short-read-sets)
-     * [Averages over good short read sets](#averages-over-good-short-read-sets)
-     * [SPAdes performance by version](#spades-performance-by-version)
-     * [ABySS performance by version](#abyss-performance-by-version)
-     * [Unicycler performance by version](#unicycler-performance-by-version)
+    * [Bad short reads](#bad-short-reads)
+    * [Medium short reads](#medium-short-reads)
+    * [Good short reads](#good-short-reads)
 * [Assembly of synthetic hybrid read sets](#assembly-of-synthetic-hybrid-read-sets)
-     * [Averages over all hybrid read sets](#averages-over-all-hybrid-read-sets)
-     * [Averages over bad short read sets](#averages-over-bad-short-read-sets-1)
-     * [Averages over medium short read sets](#averages-over-medium-short-read-sets-1)
-     * [Averages over good short read sets](#averages-over-good-short-read-sets-1)
-     * [Averages over bad long read sets](#averages-over-bad-long-read-sets)
-     * [Averages over medium long read sets](#averages-over-medium-long-read-sets)
-     * [Averages over good long read sets](#averages-over-good-long-read-sets)
-     * [SPAdes performance by version](#spades-performance-by-version-1)
-     * [npScarf performance by version](#npscarf-performance-by-version)
-     * [Unicycler performance by version](#unicycler-performance-by-version-1)
+    * [Bad short, bad long](#bad-short-bad-long)
+    * [Bad short, medium long](#bad-short-medium-long)
+    * [Bad short, good long](#bad-short-good-long)
+    * [Medium short, bad long](#medium-short-bad-long)
+    * [Medium short, medium long](#medium-short-medium-long)
+    * [Medium short, good long](#medium-short-good-long)
+    * [Good short, bad long](#good-short-bad-long)
+    * [Good short, medium long](#good-short-medium-long)
+    * [Good short, good long](#good-short-good-long)
+* [Conclusions](#conclusions)
 * [Tools](#tools)
-     * [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads)
-     * [Generating synthetic long reads](#generating-synthetic-long-reads)
-     * [Running test assemblies](#running-test-assemblies)
+    * [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads)
+    * [Generating synthetic long reads](#generating-synthetic-long-reads)
+    * [Running test assemblies](#running-test-assemblies)
+
 
 
 # Programs tested
@@ -44,19 +44,53 @@ This repo is still a work in progress! Check back later for more results!
 * [ABySS](https://github.com/bcgsc/abyss) for short read assemblies. Both `*-contigs.fa` and `*-scaffolds.fa` are analysed. ABySS needs a k-mer size as a parameter, so I used `k=64` as shown in their example for [assembling a paired-end library](https://github.com/bcgsc/abyss#assembling-a-paired-end-library).
 * [Velvet](https://www.ebi.ac.uk/~zerbino/velvet/) for short read assemblies. Like ABySS, Velvet needs a k-mer. To match the ABySS assemblies, I used a k-mer of 63 (Velvet k-mers must be odd).
 * [VelvetOptimiser](https://github.com/tseemann/VelvetOptimiser) for short read assemblies. I used a very wide k-mer sweep, from 19 to 101 (slow but thorough).
+* [Canu](http://canu.readthedocs.io/en/latest/) and [Pilon](https://github.com/broadinstitute/pilon/wiki) for hybrid assemblies. This approach uses the long reads alone to create the assembly and then polishes it with the short reads.
 
 For the exact commands, check out the files in the [assembly_commands/](assembly_commands/) directory.
+
 
 
 # Metrics
 
 I ran [QUAST 4.4](http://quast.bioinf.spbau.ru/) on each assembly, which generates many metrics you can read about in the [QUAST manual](http://quast.bioinf.spbau.ru/manual.html). Below are some quick explanations of the few I chose to focus on here:
 
+* __Successes__: The number of times the assembler successfully completed the assembly over the number of attempted assemblies. Assemblers could fail due to a crash or due to exceeding memory requirements (up to 64 GB was available for these tests).
 * __N50__: A well-known metric of contig sizes. Contigs of this size and larger comprise at least half of the assembly. This metric measures only how big the contigs are, not whether they are correct. E.g. it is possible to 'cheat' your way to a large N50 score by aggressively combining sequences which shouldn't be combined.
 * __NGA50__: This is like N50, but instead of being based on contig sizes, it is based on QUAST's alignments of contigs to the reference genome. Since a misassembled contig can have multiple smaller alignments, this metric does penalise for assembly errors. I think of it as like an N50 score where you can't 'cheat'. For these tests, QUAST was run with the `--strict-NA` option which makes it break alignments on both local and extensive misassemblies (the default is to only break on extensive misassemblies).
-* __Misassemblies__: QUAST categories misassemblies as either local (less than 1 kbp discrepancy) or extensive (more than 1 kbp discrepancy). This metric is a sum of the two. I.e. it is a count of all misassemblies, regardless of their size.
-* __Small error rate__: QUAST counts both mismatch and indel rates, and this metric is a sum of the two. Indels counted here are small, because if they were too large they would instead be a misassembly.
-* __Assembly time__: How many minutes the assembly took to complete. These tests were all run with 8 cores, but the conditions weren't very controlled, so these values won't be too precise.
+* __Misassemblies__: QUAST categories misassemblies as either local (less than 1 kbp discrepancy) or extensive (more than 1 kbp discrepancy). This metric is a sum of the two (i.e. a count of all misassemblies, regardless of their size).
+* __Small error rate__: QUAST counts both mismatch and indel rates, and this metric is a sum of the two. Indels counted here are small, because large indels will instead register as a misassembly. As in the QUAST results, these are expressed as a count per 100 kpb.
+* __Assembly time__: How many minutes the assembly took to complete. These tests were all run with 8 cores, but the conditions weren't very controlled, so these times won't be too precise.
+
+To give an accurate comparison between assemblers, the tables below show the average values for the read sets _completed by all assemblers_. E.g. if if assembler A completed all 45/45 read sets, assembler B completed 44/45 (failed on one) and assembler C completed 44/45 (failed on a different one), then the table will show averages for the 43 read sets completed by all assemblers.
+
+
+
+# Reference genomes
+
+Three references are artificial genomes:
+* __random sequences, no repeats__: a 4 Mb genome, 100 kb plasmid and 10 kb plasmid, all made of random bases. This is the easiest 'genome' to assemble.
+* __random sequences, some repeats__: The same three replicon sizes but with a moderate amount of repeats added.
+* __random sequences, many repeats__: The same three replicon sizes but with a large number of repeats added.
+
+Twelve references are real genomes available from [NCBI](https://www.ncbi.nlm.nih.gov/genome/):
+* [_Acinetobacter baumannii_ A1](https://www.ncbi.nlm.nih.gov/assembly/248731/): has a large, repetitive biofilm-associated protein gene that's difficult to assemble
+* [_Acinetobacter baumannii_ AB30](https://www.ncbi.nlm.nih.gov/assembly/206901/): has a large, repetitive biofilm-associated protein gene that's difficult to assemble
+* [_Escherichia coli_ K-12 MG1655](https://www.ncbi.nlm.nih.gov/assembly/79781)
+* [_Escherichia coli_ O25b:H4-ST131 EC958](https://www.ncbi.nlm.nih.gov/assembly/319101)
+* [_Klebsiella pneumoniae_ 30660/NJST258_1](https://www.ncbi.nlm.nih.gov/assembly/131541): lots of plasmids
+* [_Klebsiella pneumoniae_ MGH 78578](https://www.ncbi.nlm.nih.gov/assembly/37408/): lots of plasmids
+* [_Klebsiella pneumoniae_ NTUH-K2044](https://www.ncbi.nlm.nih.gov/assembly/31388/)
+* [_Mycobacterium tuberculosis_ H37Rv](https://www.ncbi.nlm.nih.gov/assembly/538048): Lots of PE and PPE genes, moderately difficult to assemble.
+* [_Saccharomyces cerevisiae_ S288c](https://www.ncbi.nlm.nih.gov/assembly/285498): the only eurkaryote genome included - haploid with 16 linear chromosomes and a circular mitochondrial chromosome
+* [_Shigella dysenteriae_ Sd197](https://www.ncbi.nlm.nih.gov/assembly/33108/): has lots of insertion sequences and is difficult to assemble
+* [_Shigella sonnei_ 53G](https://www.ncbi.nlm.nih.gov/assembly/406998): has lots of insertion sequences and is difficult to assemble
+* [_Streptococcus suis_ BM407](https://www.ncbi.nlm.nih.gov/assembly/45668/)
+
+
+
+# Synthetic reads
+
+The read files are too large to include in this GitHub repo, but you can download them here: [https://cloudstor.aarnet.edu.au/plus/index.php/s/dzRCaxLjpGpfKYW](https://cloudstor.aarnet.edu.au/plus/index.php/s/dzRCaxLjpGpfKYW)
 
 
 
@@ -65,13 +99,49 @@ I ran [QUAST 4.4](http://quast.bioinf.spbau.ru/) on each assembly, which generat
 Short reads were generated at three different quality levels: bad, medium and good (see [Generating synthetic Illumina reads](#generating-synthetic-illumina-reads) for more information).
 
 
-### Bad short read sets
+### Bad short reads
+
+| Assembler              | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :--------------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| Velvet v1.2.10         |                |           |        |       |               |                  |      |
+| VelvetOptimiser v2.2.5 |                |           |        |       |               |                  |      |
+| ABySS v2.0.2           | contigs        |           |        |       |               |                  |      |
+| ABySS v2.0.2           | scaffolds      |           |        |       |               |                  |      |
+| SPAdes v3.9.1          | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1          | scaffolds      |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | bold           |           |        |       |               |                  |      |
 
 
-### Medium short read sets
+### Medium short reads
+
+| Assembler              | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :--------------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| Velvet v1.2.10         |                |           |        |       |               |                  |      |
+| VelvetOptimiser v2.2.5 |                |           |        |       |               |                  |      |
+| ABySS v2.0.2           | contigs        |           |        |       |               |                  |      |
+| ABySS v2.0.2           | scaffolds      |           |        |       |               |                  |      |
+| SPAdes v3.9.1          | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1          | scaffolds      |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | bold           |           |        |       |               |                  |      |
 
 
-### Good short read sets
+### Good short reads
+
+| Assembler              | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :--------------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| Velvet v1.2.10         |                |           |        |       |               |                  |      |
+| VelvetOptimiser v2.2.5 |                |           |        |       |               |                  |      |
+| ABySS v2.0.2           | contigs        |           |        |       |               |                  |      |
+| ABySS v2.0.2           | scaffolds      |           |        |       |               |                  |      |
+| SPAdes v3.9.1          | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1          | scaffolds      |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0       | bold           |           |        |       |               |                  |      |
 
 
 
@@ -82,31 +152,130 @@ The hybrid read sets use the same synthetic Illumina reads as described above (t
 All nine combinations of short and long reads sets were assembled: bad/bad, bad/medium, bad/good, medium/bad, medium/medium, medium/good, good/bad, good/medium and good/good.
 
 
-### Bad short, bad long hybrid read sets
+### Bad short, bad long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Bad short, medium long hybrid read sets
+### Bad short, medium long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Bad short, good long hybrid read sets
+### Bad short, good long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Medium short, bad long hybrid read sets
+### Medium short, bad long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Medium short, medium long hybrid read sets
+### Medium short, medium long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Medium short, good long hybrid read sets
+### Medium short, good long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Good short, bad long hybrid read sets
+### Good short, bad long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Good short, medium long hybrid read sets
+### Good short, medium long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
-### Good short, good long hybrid read sets
+### Good short, good long
+
+| Assembler         | Setting/output | Successes |    N50 | NGA50 | Misassemblies | Small error rate | Time |
+| :---------------- | :------------- | --------: | -----: | ----: | ------------: | ---------------: | ---: |
+| SPAdes v3.9.1     | contigs        |           |        |       |               |                  |      |
+| SPAdes v3.9.1     | scaffolds      |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | from contigs   |           |        |       |               |                  |      |
+| npScarf v1.6‑10a  | with graph     |           |        |       |               |                  |      |
+| Canu v1.4 + Pilon |                |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | conservative   |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | normal         |           |        |       |               |                  |      |
+| Unicycler v0.2.0  | bold           |           |        |       |               |                  |      |
 
 
 
@@ -116,7 +285,7 @@ All nine combinations of short and long reads sets were assembled: bad/bad, bad/
 
 # Tools
 
-These the scripts included in this repo
+These the scripts included in this repo that I used to generate the reads and run the assembly tests.
 
 ### Generating synthetic Illumina reads
 
@@ -126,11 +295,9 @@ These the scripts included in this repo
 
 ##### Quality presets
 
-`--bad` is equivalent to `--depth 40.0 --platform HS10_100` and will generate 100 bp reads with low and uneven depth. The resulting assembly graph may contain many dead ends due to areas missing coverage.
-
-`--medium` is equivalent to `--depth 40.0 --platform HS25_125` and will generate 125 bp reads. The depth will probably be sufficient to cover the entire genome.
-
-`--good` is equivalent to `--depth 100.0 --platform HS25_150` and will generate 150 bp reads with abundant depth.
+* `--bad` is equivalent to `--depth 40.0 --platform HS10_100` and will generate 100 bp reads with low and uneven depth. The resulting assembly graph may contain many dead ends due to areas missing coverage.
+* `--medium` is equivalent to `--depth 40.0 --platform HS25_125` and will generate 125 bp reads. The depth will probably be even enough to cover the entire genome.
+* `--good` is equivalent to `--depth 100.0 --platform HS25_150` and will generate 150 bp reads with abundant and even depth.
 
 
 ### Generating synthetic long reads
@@ -139,17 +306,16 @@ These the scripts included in this repo
 
 ##### Quality presets
 
-`--good_nanopore` is equivalent to `--length 20000 --id_alpha 13 --id_beta 2 --id_max 0.98`
+Nanopore presets have a wider distribution of read identity. PacBio presets have a narrow identity distribution.
 
-`--medium_nanopore` is equivalent to `--length 10000 --id_alpha 12 --id_beta 3 --id_max 0.95`
+* `--bad_nanopore` is equivalent to `--depth 8.0 --length 5000 --id_alpha 11 --id_beta 4 --id_max 0.9`
+* `--medium_nanopore` is equivalent to `--depth 16.0 --length 10000 --id_alpha 12 --id_beta 3 --id_max 0.95`
+* `--good_nanopore` is equivalent to `--depth 32.0 --length 20000 --id_alpha 13 --id_beta 2 --id_max 0.98`
+* `--bad_pacbio` is equivalent to `--depth 8.0 --length 5000 --id_alpha 75 --id_beta 25 --id_max 1.0`
+* `--medium_pacbio` is equivalent to `--depth 16.0 --length 10000 --id_alpha 85 --id_beta 15 --id_max 1.0`
+* `--good_pacbio` is equivalent to `--depth 32.0 --length 20000 --id_alpha 90 --id_beta 10 --id_max 1.0`
 
-`--bad_nanopore` is equivalent to `--length 5000 --id_alpha 11 --id_beta 4 --id_max 0.9`
-
-`--good_pacbio` is equivalent to `--length 20000 --id_alpha 90 --id_beta 10 --id_max 1.0`
-
-`--medium_pacbio` is equivalent to `--length 10000 --id_alpha 85 --id_beta 15 --id_max 1.0`
-
-`--bad_pacbio` is equivalent to `--length 5000 --id_alpha 75 --id_beta 25 --id_max 1.0`
+The depths are on the low side. I.e. if you used a full PacBio SMRT Cell or Nanopore flow cell for one bacterial isolate, you'd probably get higher depth than these presets give. These depths instead simulate what you might get if you multiplex multiple bacterial isolates together: lower depth but lower cost.
 
 
 ### Running test assemblies
