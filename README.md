@@ -96,7 +96,7 @@ The read files are too large for this GitHub repo, but you can download them her
 
 # Assembly of synthetic short reads
 
-Short reads were synthesised at three different qualities: bad, medium and good (see [synthetic Illumina read quality presets](#quality-presets)).
+Short reads were synthesised at three different qualities: bad, medium and good (see [synthetic Illumina read quality presets](#quality-presets)). The values in the following tables are the means across all 15 references and all 3 quality levels.
 
 
 ### Bad short reads
@@ -147,9 +147,7 @@ Short reads were synthesised at three different qualities: bad, medium and good 
 
 # Assembly of synthetic hybrid read sets
 
-The hybrid read sets use the same synthetic Illumina reads as described above (three quality levels). Long reads were also synthesised at three qualites (see [synthetic long read quality presets](#quality-presets-1)).
-
-All nine combinations of short and long reads sets were assembled: bad/bad, bad/medium, bad/good, medium/bad, medium/medium, medium/good, good/bad, good/medium and good/good.
+The hybrid read sets use the same synthetic Illumina reads as described above (three quality levels). Long reads were also synthesised at three qualites (see [synthetic long read quality presets](#quality-presets-1)).  The values in the following tables are the means across all 15 references and all 9 quality combinations (bad/bad, bad/medium, bad/good, medium/bad, medium/medium, medium/good, good/bad, good/medium and good/good).
 
 
 ### Bad short, bad long
