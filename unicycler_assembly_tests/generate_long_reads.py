@@ -95,19 +95,25 @@ def get_args():
 
     # Nanopore presets have a wider distribution of read identity.
     if args.good_nanopore:
-        args.length, args.id_alpha, args.id_beta, args.id_max = 20000, 13, 2, 0.98
+        args.length, args.id_alpha, args.id_beta, args.id_max, args.depth = \
+            20000, 13, 2, 0.98, 8.0
     elif args.medium_nanopore:
-        args.length, args.id_alpha, args.id_beta, args.id_max = 10000, 12, 3, 0.95
+        args.length, args.id_alpha, args.id_beta, args.id_max, args.depth = \
+            10000, 12, 3, 0.95, 16.0
     elif args.bad_nanopore:
-        args.length, args.id_alpha, args.id_beta, args.id_max = 5000, 11, 4, 0.9
+        args.length, args.id_alpha, args.id_beta, args.id_max, args.depth = \
+            5000, 11, 4, 0.9, 32.0
 
     # PacBio presets have a narrow distribution of read identity.
     elif args.good_pacbio:
-        args.length, args.id_alpha, args.id_beta, args.id_max = 20000, 90, 10, 1.0
+        args.length, args.id_alpha, args.id_beta, args.id_max, args.depth = \
+            20000, 90, 10, 1.0, 8.0
     elif args.medium_pacbio:
-        args.length, args.id_alpha, args.id_beta, args.id_max = 10000, 85, 15, 1.0
+        args.length, args.id_alpha, args.id_beta, args.id_max, args.depth = \
+            10000, 85, 15, 1.0, 16.0
     elif args.bad_pacbio:
-        args.length, args.id_alpha, args.id_beta, args.id_max = 5000, 75, 25, 1.0
+        args.length, args.id_alpha, args.id_beta, args.id_max, args.depth = \
+            5000, 75, 25, 1.0, 32.0
 
     # Look for model_qc file in the same directory as this script.
     if args.model_qc == 'model_qc_clr' and not os.path.isfile(args.model_qc):
