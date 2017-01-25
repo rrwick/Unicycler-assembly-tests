@@ -72,8 +72,7 @@ Three references are artificial bacterial genomes:
 * __random sequences, some repeats__: The same three replicon sizes but with a moderate amount of repeats added.
 * __random sequences, many repeats__: The same three replicon sizes but with a large number of repeats added.
 
-Twelve references are assemblies available from [NCBI](https://www.ncbi.nlm.nih.gov/):
-* [_Acinetobacter baumannii_ A1](https://www.ncbi.nlm.nih.gov/assembly/248731/): has a large, repetitive biofilm-associated protein gene that's difficult to assemble
+Nine references are assemblies available from [NCBI](https://www.ncbi.nlm.nih.gov/):
 * [_Acinetobacter baumannii_ AB30](https://www.ncbi.nlm.nih.gov/assembly/206901/): has a large, repetitive biofilm-associated protein gene that's difficult to assemble
 * [_Escherichia coli_ K-12 MG1655](https://www.ncbi.nlm.nih.gov/assembly/79781)
 * [_Escherichia coli_ O25b:H4-ST131 EC958](https://www.ncbi.nlm.nih.gov/assembly/319101)
@@ -81,8 +80,6 @@ Twelve references are assemblies available from [NCBI](https://www.ncbi.nlm.nih.
 * [_Klebsiella pneumoniae_ MGH 78578](https://www.ncbi.nlm.nih.gov/assembly/37408/): lots of plasmids
 * [_Klebsiella pneumoniae_ NTUH-K2044](https://www.ncbi.nlm.nih.gov/assembly/31388/)
 * [_Mycobacterium tuberculosis_ H37Rv](https://www.ncbi.nlm.nih.gov/assembly/538048): Lots of PE and PPE genes, moderately difficult to assemble.
-* [_Saccharomyces cerevisiae_ S288c](https://www.ncbi.nlm.nih.gov/assembly/285498): the only eurkaryote genome included - haploid with 16 linear chromosomes and a circular mitochondrial chromosome
-* [_Shigella dysenteriae_ Sd197](https://www.ncbi.nlm.nih.gov/assembly/33108/): has lots of insertion sequences and is difficult to assemble
 * [_Shigella sonnei_ 53G](https://www.ncbi.nlm.nih.gov/assembly/406998): has lots of insertion sequences and is difficult to assemble
 * [_Streptococcus suis_ BM407](https://www.ncbi.nlm.nih.gov/assembly/45668/)
 
